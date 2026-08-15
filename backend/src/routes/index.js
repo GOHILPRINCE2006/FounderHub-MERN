@@ -1,0 +1,18 @@
+const express = require("express");
+const router = express.Router();
+
+const authRoutes = require("./auth.routes");
+const userRoutes = require("./user.routes");
+const startupRoutes = require("./startup.routes");
+const recruitmentRoutes = require("./recruitment.routes");
+const applicationRoutes = require("./application.routes");
+const taskRoutes = require("./task.routes");
+
+router.use("/auth", authRoutes);
+router.use("/users", userRoutes);
+router.use("/startups", startupRoutes);
+router.use("/recruitments", recruitmentRoutes);
+router.use("/applications", applicationRoutes);
+router.use("/tasks", taskRoutes);
+
+module.exports = router;
