@@ -7,6 +7,8 @@ const startupRoutes = require("./startup.routes");
 const recruitmentRoutes = require("./recruitment.routes");
 const applicationRoutes = require("./application.routes");
 const taskRoutes = require("./task.routes");
+const messageRoutes = require("./message.routes");
+const mentorRoutes = require("./mentor.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -14,5 +16,7 @@ router.use("/startups", startupRoutes);
 router.use("/recruitments", recruitmentRoutes);
 router.use("/applications", applicationRoutes);
 router.use("/tasks", taskRoutes);
+router.use("/messages", messageRoutes);
+router.use("/mentors", mentorRoutes);
 
 module.exports = router;
