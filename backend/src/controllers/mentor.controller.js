@@ -4,6 +4,7 @@ const ApiResponse = require("../utils/ApiResponse");
 const MentorFeedback = require("../models/MentorFeedback");
 const Startup = require("../models/Startup");
 const User = require("../models/User");
+const sendNotification = require("../utils/sendNotification");
 
 // @route GET /api/v1/mentors
 // @access Public (founders browse verified mentors to select from)
@@ -77,7 +78,7 @@ const submitFeedback = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Feedback text is required");
   }
 
-  const feedbackRequest = await MentorFeedback.findById(req.params.id);
+  const feedbackRequest = await MentorFeedback.findById(req.params.id).populate("startup");
   if (!feedbackRequest) {
     throw new ApiError(404, "Feedback request not found");
   }
@@ -89,6 +90,14 @@ const submitFeedback = asyncHandler(async (req, res) => {
   feedbackRequest.feedbackText = feedbackText.trim();
   feedbackRequest.status = "Reviewed";
   await feedbackRequest.save();
+
+  await sendNotification(req, {
+    recipient: feedbackRequest.startup.founder,
+    type: "MENTOR_FEEDBACK_RECEIVED",
+    message: `${req.user.name} left feedback on "${feedbackRequest.startup.name}"`,
+    link: `/startups/${feedbackRequest.startup._id}/mentor-feedback`,
+    relatedStartup: feedbackRequest.startup._id,
+  });
 
   return res
     .status(200)

@@ -3,6 +3,7 @@ const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const Task = require("../models/Task");
 const Startup = require("../models/Startup");
+const sendNotification = require("../utils/sendNotification");
 
 // Helper: check if user is founder of the startup OR a team member
 const getAuthorizedStartup = async (startupId, userId) => {
@@ -54,6 +55,16 @@ const createTask = asyncHandler(async (req, res) => {
     startup: startupId,
     createdBy: req.user._id,
   });
+
+  if (assignedMember) {
+    await sendNotification(req, {
+      recipient: assignedMember,
+      type: "TASK_ASSIGNED",
+      message: `You were assigned a new task: "${task.title}" on ${startup.name}`,
+      link: `/startups/${startup._id}/tasks`,
+      relatedStartup: startup._id,
+    });
+  }
 
   return res
     .status(201)

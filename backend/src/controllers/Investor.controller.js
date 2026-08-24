@@ -3,6 +3,7 @@ const ApiError = require("../utils/ApiError");
 const ApiResponse = require("../utils/ApiResponse");
 const InvestorConnection = require("../models/InvestorConnection");
 const Startup = require("../models/Startup");
+const sendNotification = require("../utils/sendNotification");
 
 // @route GET /api/v1/investors/startups/:id/team
 // @access Public (browsing a startup's team is not gated behind a role;
@@ -44,6 +45,14 @@ const sendConnectionRequest = asyncHandler(async (req, res) => {
     startup: startupId,
     investor: req.user._id,
     message: message || "",
+  });
+
+  await sendNotification(req, {
+    recipient: startup.founder,
+    type: "INVESTOR_REQUEST_RECEIVED",
+    message: `${req.user.name} sent a connection request to "${startup.name}"`,
+    link: `/startups/${startup._id}/investor-requests`,
+    relatedStartup: startup._id,
   });
 
   return res
@@ -100,6 +109,14 @@ const acceptConnectionRequest = asyncHandler(async (req, res) => {
   connectionRequest.status = "Accepted";
   await connectionRequest.save();
 
+  await sendNotification(req, {
+    recipient: connectionRequest.investor,
+    type: "INVESTOR_REQUEST_ACCEPTED",
+    message: `"${connectionRequest.startup.name}" accepted your connection request`,
+    link: `/startups/${connectionRequest.startup._id}`,
+    relatedStartup: connectionRequest.startup._id,
+  });
+
   return res
     .status(200)
     .json(new ApiResponse(200, connectionRequest, "Connection request accepted successfully"));
@@ -124,6 +141,14 @@ const rejectConnectionRequest = asyncHandler(async (req, res) => {
 
   connectionRequest.status = "Rejected";
   await connectionRequest.save();
+
+  await sendNotification(req, {
+    recipient: connectionRequest.investor,
+    type: "INVESTOR_REQUEST_REJECTED",
+    message: `"${connectionRequest.startup.name}" declined your connection request`,
+    link: `/startups/${connectionRequest.startup._id}`,
+    relatedStartup: connectionRequest.startup._id,
+  });
 
   return res
     .status(200)

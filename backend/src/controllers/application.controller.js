@@ -4,6 +4,7 @@ const ApiResponse = require("../utils/ApiResponse");
 const Application = require("../models/Application");
 const RecruitmentPost = require("../models/RecruitmentPost");
 const Startup = require("../models/Startup");
+const sendNotification = require("../utils/sendNotification");
 
 // @route POST /api/v1/applications/:postId
 // @access Developer/Designer only
@@ -44,6 +45,17 @@ const applyToPost = asyncHandler(async (req, res) => {
       throw new ApiError(409, "You have already applied to this post");
     }
     throw error;
+  }
+
+  const startup = await Startup.findById(post.startup);
+  if (startup) {
+    await sendNotification(req, {
+      recipient: startup.founder,
+      type: "NEW_APPLICATION",
+      message: `${req.user.name} applied to your "${post.roleTitle}" post`,
+      link: `/startups/${startup._id}/applications`,
+      relatedStartup: startup._id,
+    });
   }
 
   return res
@@ -111,6 +123,14 @@ const acceptApplication = asyncHandler(async (req, res) => {
     $addToSet: { teamMembers: application.applicant },
   });
 
+  await sendNotification(req, {
+    recipient: application.applicant,
+    type: "APPLICATION_ACCEPTED",
+    message: `Your application to "${application.startup.name}" was accepted`,
+    link: `/startups/${application.startup._id}`,
+    relatedStartup: application.startup._id,
+  });
+
   return res
     .status(200)
     .json(new ApiResponse(200, application, "Application accepted successfully"));
@@ -135,6 +155,14 @@ const rejectApplication = asyncHandler(async (req, res) => {
 
   application.status = "Rejected";
   await application.save();
+
+  await sendNotification(req, {
+    recipient: application.applicant,
+    type: "APPLICATION_REJECTED",
+    message: `Your application to "${application.startup.name}" was rejected`,
+    link: `/startups/${application.startup._id}`,
+    relatedStartup: application.startup._id,
+  });
 
   return res
     .status(200)
