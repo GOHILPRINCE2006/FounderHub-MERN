@@ -26,6 +26,11 @@ const io = new Server(httpServer, {
 
 initializeSocket(io);
 
+// Make io reachable from controllers via req.app.get("io"), so REST
+// endpoints (applications, tasks, mentors, investors) can emit
+// notification events without importing the sockets module directly.
+app.set("io", io);
+
 connectDB().then(() => {
   httpServer.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);

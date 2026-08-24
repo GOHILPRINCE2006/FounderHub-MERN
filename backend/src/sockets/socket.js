@@ -39,6 +39,12 @@ const initializeSocket = (io) => {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.user.name} (${socket.id})`);
 
+    // Auto-join a personal room (named after the user's own id) so
+    // REST controllers can push targeted notifications to this user via
+    // io.to(userId).emit("newNotification", ...) regardless of which
+    // startup room(s) they're in.
+    socket.join(socket.user._id.toString());
+
     // Join a startup's team chat room (only if authorized)
     socket.on("joinStartupRoom", async (startupId) => {
       try {
