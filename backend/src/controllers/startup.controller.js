@@ -101,12 +101,23 @@ const deleteStartup = asyncHandler(async (req, res) => {
 });
 
 // @route GET /api/v1/startups/:id
-// @access Public
+// @access Public — but a hidden (isModerated: false) startup is only
+// visible to its own founder or an admin. Anyone else gets a 404, same as
+// if the startup didn't exist, so the moderation action isn't leaked.
 const getStartupById = asyncHandler(async (req, res) => {
   const startup = await Startup.findById(req.params.id).populate("founder", "name email avatar");
 
   if (!startup) {
     throw new ApiError(404, "Startup not found");
+  }
+
+  if (!startup.isModerated) {
+    const isAdmin = req.user && req.user.role === "admin";
+    const isOwner = req.user && startup.founder._id.toString() === req.user._id.toString();
+
+    if (!isAdmin && !isOwner) {
+      throw new ApiError(404, "Startup not found");
+    }
   }
 
   return res
