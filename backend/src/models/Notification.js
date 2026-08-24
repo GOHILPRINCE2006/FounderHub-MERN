@@ -18,6 +18,8 @@ const notificationSchema = new mongoose.Schema(
         "INVESTOR_REQUEST_RECEIVED",
         "INVESTOR_REQUEST_ACCEPTED",
         "INVESTOR_REQUEST_REJECTED",
+        "VERIFICATION_APPROVED",
+        "VERIFICATION_REJECTED",
       ],
       required: true,
     },
