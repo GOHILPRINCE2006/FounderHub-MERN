@@ -12,7 +12,7 @@ const mentorRoutes = require("./mentor.routes");
 const investorRoutes = require("./investor.routes");
 const notificationRoutes = require("./notification.routes");
 const progressRoutes = require("./progress.routes");
-const adminRoutes = require("./admin.routes");
+const adminRoutes = require("./Admin.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
