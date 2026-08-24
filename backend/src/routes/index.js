@@ -9,6 +9,7 @@ const applicationRoutes = require("./application.routes");
 const taskRoutes = require("./task.routes");
 const messageRoutes = require("./message.routes");
 const mentorRoutes = require("./mentor.routes");
+const investorRoutes = require("./investor.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -18,5 +19,6 @@ router.use("/applications", applicationRoutes);
 router.use("/tasks", taskRoutes);
 router.use("/messages", messageRoutes);
 router.use("/mentors", mentorRoutes);
+router.use("/investors", investorRoutes);
 
 module.exports = router;

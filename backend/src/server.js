@@ -1,3 +1,8 @@
+const dns = require("dns");
+
+// Force Node.js to use Google DNS for MongoDB SRV lookup
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const dotenv = require("dotenv");
 dotenv.config();
 
