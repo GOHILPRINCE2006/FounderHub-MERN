@@ -11,6 +11,7 @@ const messageRoutes = require("./message.routes");
 const mentorRoutes = require("./mentor.routes");
 const investorRoutes = require("./investor.routes");
 const notificationRoutes = require("./notification.routes");
+const progressRoutes = require("./progress.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -22,5 +23,6 @@ router.use("/messages", messageRoutes);
 router.use("/mentors", mentorRoutes);
 router.use("/investors", investorRoutes);
 router.use("/notifications", notificationRoutes);
+router.use("/progress", progressRoutes);
 
 module.exports = router;
