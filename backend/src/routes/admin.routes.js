@@ -14,7 +14,7 @@ const {
   approveVerification,
   revokeVerification,
   getPlatformStats,
-} = require("../controllers/Admin.controller");
+} = require("../controllers/admin.controller");
 
 const protect = require("../middlewares/auth.middleware");
 const authorizeRoles = require("../middlewares/role.middleware");

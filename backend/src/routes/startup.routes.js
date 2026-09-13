@@ -11,7 +11,7 @@ const {
 } = require("../controllers/startup.controller");
 
 const protect = require("../middlewares/auth.middleware");
-const optionalAuth = require("../middlewares/Optionalauth.middleware");
+const optionalAuth = require("../middlewares/optionalauth.middleware");
 const authorizeRoles = require("../middlewares/role.middleware");
 const upload = require("../middlewares/upload.middleware");
 
