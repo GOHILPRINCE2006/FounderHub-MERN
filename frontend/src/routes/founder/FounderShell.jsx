@@ -4,6 +4,7 @@ import LogoutButton from "../../components/common/LogoutButton";
 const FOUNDER_NAV_ITEMS = [
   { label: "Overview", to: "/dashboard" },
   { label: "My Startup", to: "/founder/startup" },
+  { label: "Recruitment", to: "/founder/recruitment" },
 ];
 
 export default function FounderShell() {
