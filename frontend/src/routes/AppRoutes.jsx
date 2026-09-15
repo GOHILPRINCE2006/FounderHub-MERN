@@ -8,10 +8,12 @@ import NotFound from "../pages/NotFound";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import DashboardHome from "../pages/dashboard/DashboardHome";
+import CreateStartup from "../pages/founder/CreateStartup";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardShell from "./DashboardShell";
+import FounderShell from "./founder/FounderShell";
 
 export default function AppRoutes() {
   const dispatch = useDispatch();
@@ -34,6 +36,12 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardShell />}>
           <Route path="/dashboard" element={<DashboardHome />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["founder"]} />}>
+          <Route element={<FounderShell />}>
+            <Route path="/founder/startup" element={<CreateStartup />} />
+          </Route>
         </Route>
       </Route>
 

@@ -1,4 +1,6 @@
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import Button from "../../components/common/Button";
 
 export default function DashboardHome() {
   const { user } = useSelector((state) => state.auth);
@@ -12,9 +14,14 @@ export default function DashboardHome() {
         Logged in as <span className="font-medium text-ink">{user?.email}</span>{" "}
         — role: <span className="font-mono text-xs">{user?.role}</span>
       </p>
-      <p className="mt-4 text-sm text-muted">
-        This is a placeholder. Your real {user?.role} dashboard is built in a later phase.
-      </p>
+
+      {user?.role === "founder" && (
+        <div className="mt-4">
+          <Link to="/founder/startup">
+            <Button variant="secondary">Manage My Startup</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
