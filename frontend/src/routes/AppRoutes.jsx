@@ -10,6 +10,10 @@ import Register from "../pages/auth/Register";
 import DashboardHome from "../pages/dashboard/DashboardHome";
 import CreateStartup from "../pages/founder/CreateStartup";
 import RecruitmentPosts from "../pages/founder/RecruitmentPosts";
+import ApplicationReview from "../pages/founder/ApplicationReview";
+import BrowseOpportunities from "../pages/opportunities/BrowseOpportunities";
+import StartupDetail from "../pages/opportunities/StartupDetail";
+import MyApplications from "../pages/developer/MyApplications";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -35,12 +39,19 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardShell />}>
           <Route path="/dashboard" element={<DashboardHome />} />
+          <Route path="/opportunities" element={<BrowseOpportunities />} />
+          <Route path="/opportunities/:id" element={<StartupDetail />} />
+          <Route path="/my-applications" element={<MyApplications />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["founder"]} />}>
           <Route element={<FounderShell />}>
             <Route path="/founder/startup" element={<CreateStartup />} />
             <Route path="/founder/recruitment" element={<RecruitmentPosts />} />
+            <Route
+              path="/founder/recruitment/:postId/applications"
+              element={<ApplicationReview />}
+            />
           </Route>
         </Route>
       </Route>

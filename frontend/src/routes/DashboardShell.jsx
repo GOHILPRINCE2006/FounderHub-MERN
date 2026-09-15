@@ -1,12 +1,21 @@
+import { useSelector } from "react-redux";
 import DashboardLayout from "../components/layout/DashboardLayout";
 import LogoutButton from "../components/common/LogoutButton";
 
-// Temporary shell for Phase 14.2 testing only — real per-role navItems
-// and titles get built starting Phase 14.4.
 export default function DashboardShell() {
+  const { user } = useSelector((state) => state.auth);
+
+  const navItems = [
+    { label: "Overview", to: "/dashboard" },
+    { label: "Opportunities", to: "/opportunities" },
+    ...(user?.role === "developer"
+      ? [{ label: "My Applications", to: "/my-applications" }]
+      : []),
+  ];
+
   return (
     <DashboardLayout
-      navItems={[{ label: "Home", to: "/dashboard" }]}
+      navItems={navItems}
       title="Dashboard"
       topbarActions={<LogoutButton />}
     />

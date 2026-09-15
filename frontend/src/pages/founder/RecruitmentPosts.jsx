@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   fetchMyRecruitmentPosts,
   createRecruitmentPost,
@@ -151,6 +152,12 @@ export default function RecruitmentPosts() {
                       ))}
                     </div>
                   )}
+                  <Link
+                    to={`/founder/recruitment/${post._id}/applications`}
+                    className="mt-2 inline-block text-sm font-medium text-gold hover:underline"
+                  >
+                    View Applications →
+                  </Link>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <Button variant="outline" size="sm" onClick={() => toggleOpen(post)}>

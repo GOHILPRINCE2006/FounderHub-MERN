@@ -1,9 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 
-// Fetches the founder's own startup. A 404 here just means "not created
-// yet" — that's a normal state for this app, not a real error, so we
-// resolve it as `null` instead of rejecting.
 export const fetchMyStartup = createAsyncThunk(
   "startup/fetchMyStartup",
   async (_, { rejectWithValue }) => {
@@ -19,8 +16,6 @@ export const fetchMyStartup = createAsyncThunk(
   }
 );
 
-// formData is a real FormData instance (logo file + text fields) built
-// by the CreateStartup page, since the backend expects multipart/form-data.
 export const createStartup = createAsyncThunk(
   "startup/createStartup",
   async (formData, { rejectWithValue }) => {
@@ -49,13 +44,45 @@ export const updateStartup = createAsyncThunk(
   }
 );
 
+// Browse — public list, supports the same query params as the backend
+// (keyword, industry, stage, skills, role).
+export const fetchAllStartups = createAsyncThunk(
+  "startup/fetchAllStartups",
+  async (filters = {}, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/startups", { params: filters });
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to load startups");
+    }
+  }
+);
+
+export const fetchStartupById = createAsyncThunk(
+  "startup/fetchStartupById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/startups/${id}`);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to load startup");
+    }
+  }
+);
+
 const startupSlice = createSlice({
   name: "startup",
   initialState: {
     myStartup: null,
-    fetchStatus: "idle", // idle | loading | succeeded | failed
-    actionStatus: "idle", // for create/update submit button
+    fetchStatus: "idle",
+    actionStatus: "idle",
     error: null,
+    // Browse/detail state — separate from myStartup so a founder browsing
+    // other startups doesn't clobber their own startup's data.
+    allStartups: [],
+    browseStatus: "idle",
+    activeStartup: null,
+    detailStatus: "idle",
   },
   reducers: {
     clearStartupError: (state) => {
@@ -97,6 +124,28 @@ const startupSlice = createSlice({
       })
       .addCase(updateStartup.rejected, (state, action) => {
         state.actionStatus = "failed";
+        state.error = action.payload;
+      })
+      .addCase(fetchAllStartups.pending, (state) => {
+        state.browseStatus = "loading";
+      })
+      .addCase(fetchAllStartups.fulfilled, (state, action) => {
+        state.browseStatus = "succeeded";
+        state.allStartups = action.payload;
+      })
+      .addCase(fetchAllStartups.rejected, (state, action) => {
+        state.browseStatus = "failed";
+        state.error = action.payload;
+      })
+      .addCase(fetchStartupById.pending, (state) => {
+        state.detailStatus = "loading";
+      })
+      .addCase(fetchStartupById.fulfilled, (state, action) => {
+        state.detailStatus = "succeeded";
+        state.activeStartup = action.payload;
+      })
+      .addCase(fetchStartupById.rejected, (state, action) => {
+        state.detailStatus = "failed";
         state.error = action.payload;
       });
   },

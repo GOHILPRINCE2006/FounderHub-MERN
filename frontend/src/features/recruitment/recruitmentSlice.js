@@ -49,6 +49,20 @@ export const deleteRecruitmentPost = createAsyncThunk(
   }
 );
 
+// Public — all open posts across every startup. Each post comes back
+// with `startup` populated (name, logo, industry, stage) per the backend.
+export const fetchAllOpenPosts = createAsyncThunk(
+  "recruitment/fetchAllOpenPosts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/recruitments");
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to load open roles");
+    }
+  }
+);
+
 const recruitmentSlice = createSlice({
   name: "recruitment",
   initialState: {
@@ -56,6 +70,8 @@ const recruitmentSlice = createSlice({
     fetchStatus: "idle",
     actionStatus: "idle",
     error: null,
+    openPosts: [],
+    openPostsStatus: "idle",
   },
   reducers: {
     clearRecruitmentError: (state) => {
@@ -93,6 +109,17 @@ const recruitmentSlice = createSlice({
       })
       .addCase(deleteRecruitmentPost.fulfilled, (state, action) => {
         state.myPosts = state.myPosts.filter((p) => p._id !== action.payload);
+      })
+      .addCase(fetchAllOpenPosts.pending, (state) => {
+        state.openPostsStatus = "loading";
+      })
+      .addCase(fetchAllOpenPosts.fulfilled, (state, action) => {
+        state.openPostsStatus = "succeeded";
+        state.openPosts = action.payload;
+      })
+      .addCase(fetchAllOpenPosts.rejected, (state, action) => {
+        state.openPostsStatus = "failed";
+        state.error = action.payload;
       });
   },
 });
