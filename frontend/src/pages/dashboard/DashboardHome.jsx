@@ -22,6 +22,14 @@ export default function DashboardHome() {
           </Link>
         </div>
       )}
+
+      {user?.role === "mentor" && (
+        <div className="mt-4">
+          <Link to="/mentor/queue">
+            <Button variant="secondary">Open Feedback Queue</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

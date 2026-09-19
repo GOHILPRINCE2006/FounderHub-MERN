@@ -17,11 +17,14 @@ import StartupDetail from "../pages/opportunities/StartupDetail";
 import MyApplications from "../pages/developer/MyApplications";
 import MyTasks from "../pages/developer/MyTasks";
 import TeamChat from "../pages/chat/TeamChat";
+import MentorFeedback from "../pages/founder/MentorFeedback";
+import MentorQueue from "../pages/mentor/MentorQueue";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardShell from "./DashboardShell";
 import FounderShell from "./founder/FounderShell";
+import MentorShell from "./mentor/MentorShell";
 
 export default function AppRoutes() {
   const dispatch = useDispatch();
@@ -59,6 +62,13 @@ export default function AppRoutes() {
             />
             <Route path="/founder/tasks" element={<KanbanBoard />} />
             <Route path="/founder/chat" element={<TeamChat />} />
+            <Route path="/founder/mentors" element={<MentorFeedback />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["mentor"]} />}>
+          <Route element={<MentorShell />}>
+            <Route path="/mentor/queue" element={<MentorQueue />} />
           </Route>
         </Route>
       </Route>
