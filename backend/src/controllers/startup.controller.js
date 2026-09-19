@@ -142,6 +142,23 @@ const startup = await Startup.findOne({ founder: req.user._id }).populate(
     .json(new ApiResponse(200, startup, "Your startup fetched successfully"));
 });
 
+// @route GET /api/v1/startups/my-teams
+// @access Any logged-in user
+// Startups where the user is the founder OR a team member. Used by team chat
+// to list the chat rooms a user can open (a developer has no other way to
+// discover which startups they belong to).
+const getMyTeams = asyncHandler(async (req, res) => {
+  const startups = await Startup.find({
+    $or: [{ founder: req.user._id }, { teamMembers: req.user._id }],
+  })
+    .select("name logo founder")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, startups, "Your teams fetched successfully"));
+});
+
 // @route GET /api/v1/startups
 // @access Public
 // Query params: keyword, skills, industry, stage, role
@@ -189,5 +206,6 @@ module.exports = {
   deleteStartup,
   getStartupById,
   getMyStartup,
+  getMyTeams,
   getAllStartups,
 };

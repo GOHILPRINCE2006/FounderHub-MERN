@@ -4,6 +4,7 @@ import startupReducer from "../features/startup/startupSlice";
 import recruitmentReducer from "../features/recruitment/recruitmentSlice";
 import applicationReducer from "../features/application/applicationSlice";
 import taskReducer from "../features/task/taskSlice";
+import chatReducer from "../features/chat/chatSlice";
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     recruitment: recruitmentReducer,
     application: applicationReducer,
     task: taskReducer,
+    chat: chatReducer,
   },
 });

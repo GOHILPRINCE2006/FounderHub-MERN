@@ -16,6 +16,7 @@ import BrowseOpportunities from "../pages/opportunities/BrowseOpportunities";
 import StartupDetail from "../pages/opportunities/StartupDetail";
 import MyApplications from "../pages/developer/MyApplications";
 import MyTasks from "../pages/developer/MyTasks";
+import TeamChat from "../pages/chat/TeamChat";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -45,6 +46,7 @@ export default function AppRoutes() {
           <Route path="/opportunities/:id" element={<StartupDetail />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/my-tasks" element={<MyTasks />} />
+          <Route path="/chat" element={<TeamChat />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["founder"]} />}>
@@ -56,6 +58,7 @@ export default function AppRoutes() {
               element={<ApplicationReview />}
             />
             <Route path="/founder/tasks" element={<KanbanBoard />} />
+            <Route path="/founder/chat" element={<TeamChat />} />
           </Route>
         </Route>
       </Route>

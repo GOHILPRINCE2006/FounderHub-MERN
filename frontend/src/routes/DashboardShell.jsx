@@ -12,6 +12,7 @@ export default function DashboardShell() {
       ? [
           { label: "My Applications", to: "/my-applications" },
           { label: "My Tasks", to: "/my-tasks" },
+          { label: "Team Chat", to: "/chat" },
         ]
       : []),
   ];

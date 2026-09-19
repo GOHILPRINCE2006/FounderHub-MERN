@@ -11,6 +11,13 @@ export default defineConfig({
         target: "http://localhost:5000",
         changeOrigin: true,
       },
+      // Socket.io (team chat + later, live notifications). ws: true is what
+      // lets the WebSocket upgrade pass through the proxy.
+      "/socket.io": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
 })
