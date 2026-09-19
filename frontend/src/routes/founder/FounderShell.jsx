@@ -5,6 +5,7 @@ const FOUNDER_NAV_ITEMS = [
   { label: "Overview", to: "/dashboard" },
   { label: "My Startup", to: "/founder/startup" },
   { label: "Recruitment", to: "/founder/recruitment" },
+  { label: "Tasks", to: "/founder/tasks" },
 ];
 
 export default function FounderShell() {

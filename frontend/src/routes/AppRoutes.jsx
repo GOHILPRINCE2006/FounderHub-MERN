@@ -11,9 +11,11 @@ import DashboardHome from "../pages/dashboard/DashboardHome";
 import CreateStartup from "../pages/founder/CreateStartup";
 import RecruitmentPosts from "../pages/founder/RecruitmentPosts";
 import ApplicationReview from "../pages/founder/ApplicationReview";
+import KanbanBoard from "../pages/founder/KanbanBoard";
 import BrowseOpportunities from "../pages/opportunities/BrowseOpportunities";
 import StartupDetail from "../pages/opportunities/StartupDetail";
 import MyApplications from "../pages/developer/MyApplications";
+import MyTasks from "../pages/developer/MyTasks";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -42,6 +44,7 @@ export default function AppRoutes() {
           <Route path="/opportunities" element={<BrowseOpportunities />} />
           <Route path="/opportunities/:id" element={<StartupDetail />} />
           <Route path="/my-applications" element={<MyApplications />} />
+          <Route path="/my-tasks" element={<MyTasks />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["founder"]} />}>
@@ -52,6 +55,7 @@ export default function AppRoutes() {
               path="/founder/recruitment/:postId/applications"
               element={<ApplicationReview />}
             />
+            <Route path="/founder/tasks" element={<KanbanBoard />} />
           </Route>
         </Route>
       </Route>

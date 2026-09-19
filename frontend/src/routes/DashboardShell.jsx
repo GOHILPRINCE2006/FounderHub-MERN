@@ -9,7 +9,10 @@ export default function DashboardShell() {
     { label: "Overview", to: "/dashboard" },
     { label: "Opportunities", to: "/opportunities" },
     ...(user?.role === "developer"
-      ? [{ label: "My Applications", to: "/my-applications" }]
+      ? [
+          { label: "My Applications", to: "/my-applications" },
+          { label: "My Tasks", to: "/my-tasks" },
+        ]
       : []),
   ];
 

@@ -128,7 +128,10 @@ const getStartupById = asyncHandler(async (req, res) => {
 // @route GET /api/v1/startups/my-startup
 // @access Founder only
 const getMyStartup = asyncHandler(async (req, res) => {
-  const startup = await Startup.findOne({ founder: req.user._id });
+const startup = await Startup.findOne({ founder: req.user._id }).populate(
+  "teamMembers",
+  "name email avatar"
+);
 
   if (!startup) {
     throw new ApiError(404, "You have not created a startup yet");

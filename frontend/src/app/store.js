@@ -3,6 +3,7 @@ import authReducer from "../features/auth/authSlice";
 import startupReducer from "../features/startup/startupSlice";
 import recruitmentReducer from "../features/recruitment/recruitmentSlice";
 import applicationReducer from "../features/application/applicationSlice";
+import taskReducer from "../features/task/taskSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     startup: startupReducer,
     recruitment: recruitmentReducer,
     application: applicationReducer,
+    task: taskReducer,
   },
 });
