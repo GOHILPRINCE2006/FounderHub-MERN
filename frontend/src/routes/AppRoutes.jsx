@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { fetchCurrentUser } from "../features/auth/authSlice";
+import useLiveNotifications from "../features/notification/useLiveNotifications";
 
 import Landing from "../pages/Landing";
 import NotFound from "../pages/NotFound";
@@ -37,6 +38,9 @@ export default function AppRoutes() {
   useEffect(() => {
     dispatch(fetchCurrentUser());
   }, [dispatch]);
+
+  // Keeps the shared socket connected (and notifications live) while logged in.
+  useLiveNotifications();
 
   return (
     <Routes>

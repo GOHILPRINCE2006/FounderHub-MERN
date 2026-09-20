@@ -7,6 +7,7 @@ import taskReducer from "../features/task/taskSlice";
 import chatReducer from "../features/chat/chatSlice";
 import mentorReducer from "../features/mentor/mentorSlice";
 import investorReducer from "../features/investor/investorSlice";
+import notificationReducer from "../features/notification/notificationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     chat: chatReducer,
     mentor: mentorReducer,
     investor: investorReducer,
+    notification: notificationReducer,
   },
 });

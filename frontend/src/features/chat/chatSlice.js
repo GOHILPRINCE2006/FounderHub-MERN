@@ -53,6 +53,11 @@ const chatSlice = createSlice({
     // A live message from the socket. Ignore it if we already have it
     // (history and live messages can overlap right after connecting).
     messageReceived: (state, action) => {
+      // The socket now stays connected app-wide, so ignore live messages
+      // that belong to a room the user isn't viewing.
+      const { startupId } = action.payload;
+      if (startupId && startupId !== state.activeStartupId) return;
+
       const exists = state.messages.some((m) => m._id === action.payload._id);
       if (!exists) state.messages.push(action.payload);
     },

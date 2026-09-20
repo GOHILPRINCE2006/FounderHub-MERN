@@ -1,5 +1,7 @@
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie");
+// cookie v2 renamed parse() to parseCookie() and is ESM-only (needs Node 20.19+ / 22.12+ to
+// require() from CommonJS — the same floor Vite already requires on the frontend).
+const { parseCookie } = require("cookie");
 
 const User = require("../models/User");
 const Startup = require("../models/Startup");
@@ -15,7 +17,7 @@ const initializeSocket = (io) => {
         return next(new Error("Not authorized, no token found"));
       }
 
-      const parsedCookies = cookie.parse(rawCookie);
+      const parsedCookies = parseCookie(rawCookie);
       const token = parsedCookies.token;
 
       if (!token) {
@@ -104,8 +106,13 @@ const initializeSocket = (io) => {
 
         const populatedMessage = await message.populate("sender", "name avatar");
 
-        // Broadcast to everyone in the room, including sender
-        io.to(startupId).emit("newMessage", populatedMessage);
+        // Broadcast to everyone in the room, including sender.
+        // startupId is added so a client can ignore messages for a room it
+        // isn't currently viewing (the socket stays connected app-wide).
+        io.to(startupId).emit("newMessage", {
+          ...populatedMessage.toObject(),
+          startupId: startup._id.toString(),
+        });
       } catch (error) {
         socket.emit("errorMessage", "Failed to send message");
       }
