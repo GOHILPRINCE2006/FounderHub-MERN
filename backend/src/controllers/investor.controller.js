@@ -36,6 +36,11 @@ const sendConnectionRequest = asyncHandler(async (req, res) => {
     throw new ApiError(400, "startupId is required");
   }
 
+  // Investors are verified manually (isVerified flag), same as mentors.
+  if (!req.user.isVerified) {
+    throw new ApiError(403, "Your investor account is not verified yet");
+  }
+
   const startup = await Startup.findById(startupId);
   if (!startup) {
     throw new ApiError(404, "Startup not found");

@@ -6,6 +6,7 @@ import applicationReducer from "../features/application/applicationSlice";
 import taskReducer from "../features/task/taskSlice";
 import chatReducer from "../features/chat/chatSlice";
 import mentorReducer from "../features/mentor/mentorSlice";
+import investorReducer from "../features/investor/investorSlice";
 
 export const store = configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export const store = configureStore({
     task: taskReducer,
     chat: chatReducer,
     mentor: mentorReducer,
+    investor: investorReducer,
   },
 });

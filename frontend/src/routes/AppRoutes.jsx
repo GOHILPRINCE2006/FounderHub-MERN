@@ -19,12 +19,17 @@ import MyTasks from "../pages/developer/MyTasks";
 import TeamChat from "../pages/chat/TeamChat";
 import MentorFeedback from "../pages/founder/MentorFeedback";
 import MentorQueue from "../pages/mentor/MentorQueue";
+import InvestorRequests from "../pages/founder/InvestorRequests";
+import DiscoverStartups from "../pages/investor/DiscoverStartups";
+import InvestorStartupDetail from "../pages/investor/InvestorStartupDetail";
+import MyRequests from "../pages/investor/MyRequests";
 
 import AuthLayout from "../components/layout/AuthLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import DashboardShell from "./DashboardShell";
 import FounderShell from "./founder/FounderShell";
 import MentorShell from "./mentor/MentorShell";
+import InvestorShell from "./investor/InvestorShell";
 
 export default function AppRoutes() {
   const dispatch = useDispatch();
@@ -63,12 +68,21 @@ export default function AppRoutes() {
             <Route path="/founder/tasks" element={<KanbanBoard />} />
             <Route path="/founder/chat" element={<TeamChat />} />
             <Route path="/founder/mentors" element={<MentorFeedback />} />
+            <Route path="/founder/investors" element={<InvestorRequests />} />
           </Route>
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={["mentor"]} />}>
           <Route element={<MentorShell />}>
             <Route path="/mentor/queue" element={<MentorQueue />} />
+          </Route>
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={["investor"]} />}>
+          <Route element={<InvestorShell />}>
+            <Route path="/investor/startups" element={<DiscoverStartups />} />
+            <Route path="/investor/startups/:id" element={<InvestorStartupDetail />} />
+            <Route path="/investor/requests" element={<MyRequests />} />
           </Route>
         </Route>
       </Route>

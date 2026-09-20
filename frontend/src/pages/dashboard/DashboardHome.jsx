@@ -30,6 +30,14 @@ export default function DashboardHome() {
           </Link>
         </div>
       )}
+
+      {user?.role === "investor" && (
+        <div className="mt-4">
+          <Link to="/investor/startups">
+            <Button variant="secondary">Discover Startups</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
