@@ -12,13 +12,18 @@ import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 
 const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  new Date(iso).toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 export default function InvestorRequests() {
   const dispatch = useDispatch();
-  const { received, receivedStatus, error } = useSelector((state) => state.investor);
-  // Which request + which button is in flight, so only that button shows a spinner.
-  const [responding, setResponding] = useState(null); // { id, decision }
+  const { received, receivedStatus, error } = useSelector(
+    (state) => state.investor
+  );
+  const [responding, setResponding] = useState(null);
 
   useEffect(() => {
     dispatch(clearInvestorError());
@@ -31,17 +36,23 @@ export default function InvestorRequests() {
     setResponding(null);
   };
 
-  if (receivedStatus === "idle" || (receivedStatus === "loading" && received.length === 0)) {
+  if (
+    receivedStatus === "idle" ||
+    (receivedStatus === "loading" && received.length === 0)
+  ) {
     return <Loader label="Loading investor requests" full />;
   }
 
-  const isBusy = (id, decision) => responding?.id === id && responding?.decision === decision;
+  const isBusy = (id, decision) =>
+    responding?.id === id && responding?.decision === decision;
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-1 font-display text-xl font-semibold text-ink">Investor Requests</h1>
-      <p className="mb-6 text-sm text-muted">
-        Investors who want to connect with your startup. Accept or decline each request.
+      <h1 className="font-display text-xl font-semibold text-ink">
+        Investor Requests
+      </h1>
+      <p className="mt-1 mb-6 text-sm text-muted">
+        Investors who want to connect with your startup.
       </p>
 
       {error && (
@@ -52,7 +63,9 @@ export default function InvestorRequests() {
 
       {received.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">No investor requests yet.</p>
+          <p className="py-4 text-center text-sm text-muted">
+            No investor requests yet.
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
@@ -82,13 +95,14 @@ export default function InvestorRequests() {
                     <p className="mt-1 text-sm text-ink">{req.investor.about}</p>
                   )}
                   {req.message && (
-                    <p className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-paper p-3 text-sm text-ink">
-                      &quot;{req.message}&quot;
+                    <p className="mt-3 rounded-lg bg-paper p-3 text-sm text-ink">
+                      "{req.message}"
                     </p>
                   )}
                   <p className="mt-2 text-xs text-muted">
                     Received {formatDate(req.createdAt)}
-                    {req.status !== "Pending" && ` · Responded ${formatDate(req.updatedAt)}`}
+                    {req.status !== "Pending" &&
+                      ` · Responded ${formatDate(req.updatedAt)}`}
                   </p>
 
                   {req.status === "Pending" && (

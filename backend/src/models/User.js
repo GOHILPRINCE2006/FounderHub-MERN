@@ -3,11 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-    },
+    name: { type: String, required: [true, "Name is required"], trim: true },
     email: {
       type: String,
       required: [true, "Email is required"],
@@ -19,52 +15,59 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Password is required"],
       minlength: 6,
-      select: false, // password won't be returned in queries by default
+      select: false,
     },
     role: {
       type: String,
       enum: ["founder", "developer", "mentor", "investor", "admin"],
       required: [true, "Role is required"],
     },
-    avatar: {
+    avatar: { type: String, default: "" },
+
+    // --- Common profile (batch 1) ---
+    phone:    { type: String, default: "", trim: true },
+    location: { type: String, default: "", trim: true },
+    github:   { type: String, default: "", trim: true },
+    linkedin: { type: String, default: "", trim: true },
+    website:  { type: String, default: "", trim: true },
+    portfolioLinks: { type: [String], default: [] },
+
+    skills:     { type: [String], default: [] },
+    experience: { type: String, default: "" },
+    about:      { type: String, default: "" },
+
+    // --- Role-specific (batch 2) ---
+
+    // Developer
+    availability: {
       type: String,
+      enum: ["", "Full-time", "Part-time", "Internship"],
       default: "",
     },
-    skills: {
-      type: [String],
-      default: [],
-    },
-    portfolioLinks: {
-      type: [String],
-      default: [],
-    },
-    experience: {
-      type: String,
-      default: "",
-    },
-    about: {
-      type: String,
-      default: "",
-    },
-    isVerified: {
-      type: Boolean,
-      default: false, // used for mentor/investor verification later
-    },
-    isActive: {
-      type: Boolean,
-      default: true, // used for admin block/deactivate later
-    },
+
+    // Mentor
+    expertise:         { type: String, default: "", trim: true },
+    yearsOfExperience: { type: Number, default: 0, min: 0 },
+    currentRole:       { type: String, default: "", trim: true },
+
+    // Mentor + Investor shared
+    company: { type: String, default: "", trim: true },
+
+    // Investor
+    investmentFocus: { type: String, default: "", trim: true },
+    ticketSize:      { type: String, default: "", trim: true },
+
+    isVerified: { type: Boolean, default: false },
+    isActive:   { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// Hash password before saving
 userSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
-// Compare entered password with hashed password
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

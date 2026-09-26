@@ -13,11 +13,19 @@ import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 
 const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  new Date(iso).toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
 function Avatar({ user }) {
   return user?.avatar ? (
-    <img src={user.avatar} alt={user.name} className="h-12 w-12 shrink-0 rounded-full object-cover" />
+    <img
+      src={user.avatar}
+      alt={user.name}
+      className="h-12 w-12 shrink-0 rounded-full object-cover"
+    />
   ) : (
     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-semibold text-white">
       {user?.name?.[0] || "?"}
@@ -38,9 +46,6 @@ export default function MentorFeedback() {
     dispatch(fetchReceivedFeedback());
   }, [dispatch]);
 
-  // A mentor with a still-open request can't be asked again (the backend
-  // would happily create a duplicate). Derived from server data, so it
-  // survives a page refresh.
   const pendingMentorIds = new Set(
     received.filter((f) => f.status === "Requested").map((f) => f.mentor?._id)
   );
@@ -53,9 +58,9 @@ export default function MentorFeedback() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-1 font-display text-xl font-semibold text-ink">Mentors</h1>
-      <p className="mb-6 text-sm text-muted">
-        Ask a verified mentor to review your startup and leave feedback.
+      <h1 className="font-display text-xl font-semibold text-ink">Mentors</h1>
+      <p className="mt-1 mb-6 text-sm text-muted">
+        Ask a verified mentor to review your startup.
       </p>
 
       {error && (
@@ -64,53 +69,58 @@ export default function MentorFeedback() {
         </div>
       )}
 
-      {/* Requests already sent + feedback received */}
-      {(received.length > 0 || receivedStatus === "loading") && (
+      {received.length > 0 && (
         <section className="mb-8">
-          <h2 className="mb-3 font-display text-base font-semibold text-ink">Your requests</h2>
-          {receivedStatus === "loading" && received.length === 0 ? (
-            <Loader label="Loading your requests" />
-          ) : (
-            <div className="flex flex-col gap-3">
-              {received.map((item) => (
-                <Card key={item._id}>
-                  <div className="flex items-start gap-4">
-                    <Avatar user={item.mentor} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-display text-base font-semibold text-ink">
-                          {item.mentor?.name || "Unknown mentor"}
-                        </h3>
-                        <Badge tone={item.status === "Reviewed" ? "success" : "warning"}>
-                          {item.status === "Reviewed" ? "Feedback received" : "Awaiting feedback"}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted">
-                        Requested {formatDate(item.createdAt)}
-                        {item.status === "Reviewed" && ` · Reviewed ${formatDate(item.updatedAt)}`}
-                      </p>
-                      {item.status === "Reviewed" && item.feedbackText && (
-                        <p className="mt-3 whitespace-pre-wrap break-words rounded-lg bg-paper p-3 text-sm text-ink">
-                          {item.feedbackText}
-                        </p>
-                      )}
+          <h2 className="mb-3 font-display text-sm font-semibold text-ink">
+            Your requests
+          </h2>
+          <div className="flex flex-col gap-3">
+            {received.map((item) => (
+              <Card key={item._id}>
+                <div className="flex items-start gap-4">
+                  <Avatar user={item.mentor} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="font-display text-base font-semibold text-ink">
+                        {item.mentor?.name || "Unknown mentor"}
+                      </h3>
+                      <Badge
+                        tone={item.status === "Reviewed" ? "success" : "warning"}
+                      >
+                        {item.status === "Reviewed"
+                          ? "Feedback received"
+                          : "Awaiting feedback"}
+                      </Badge>
                     </div>
+                    <p className="mt-0.5 text-xs text-muted">
+                      Requested {formatDate(item.createdAt)}
+                      {item.status === "Reviewed" &&
+                        ` · Reviewed ${formatDate(item.updatedAt)}`}
+                    </p>
+                    {item.status === "Reviewed" && item.feedbackText && (
+                      <p className="mt-3 rounded-lg bg-paper p-3 text-sm text-ink">
+                        {item.feedbackText}
+                      </p>
+                    )}
                   </div>
-                </Card>
-              ))}
-            </div>
-          )}
+                </div>
+              </Card>
+            ))}
+          </div>
         </section>
       )}
 
-      {/* Browse verified mentors */}
       <section>
-        <h2 className="mb-3 font-display text-base font-semibold text-ink">Verified mentors</h2>
+        <h2 className="mb-3 font-display text-sm font-semibold text-ink">
+          Verified mentors
+        </h2>
         {mentorsStatus === "loading" && mentors.length === 0 ? (
           <Loader label="Loading mentors" />
         ) : mentors.length === 0 ? (
           <Card>
-            <p className="text-center text-sm text-muted">No verified mentors available yet.</p>
+            <p className="py-4 text-center text-sm text-muted">
+              No verified mentors available yet.
+            </p>
           </Card>
         ) : (
           <div className="flex flex-col gap-3">
@@ -121,11 +131,15 @@ export default function MentorFeedback() {
                   <div className="flex items-start gap-4">
                     <Avatar user={mentor} />
                     <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-base font-semibold text-ink">{mentor.name}</h3>
+                      <h3 className="font-display text-base font-semibold text-ink">
+                        {mentor.name}
+                      </h3>
                       {mentor.experience && (
                         <p className="text-sm text-muted">{mentor.experience}</p>
                       )}
-                      {mentor.about && <p className="mt-2 text-sm text-ink">{mentor.about}</p>}
+                      {mentor.about && (
+                        <p className="mt-1.5 text-sm text-ink">{mentor.about}</p>
+                      )}
                       {mentor.skills?.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {mentor.skills.map((skill) => (
@@ -146,7 +160,7 @@ export default function MentorFeedback() {
                       loading={requestingId === mentor._id}
                       onClick={() => handleRequest(mentor._id)}
                     >
-                      {isPending ? "Requested" : "Request feedback"}
+                      {isPending ? "Requested" : "Request"}
                     </Button>
                   </div>
                 </Card>

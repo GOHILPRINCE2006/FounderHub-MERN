@@ -1,17 +1,13 @@
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import LogoutButton from "../../components/common/LogoutButton";
+import { LayoutDashboard, GraduationCap } from "lucide-react";
+
+const ICON = "h-4 w-4";
 
 const MENTOR_NAV_ITEMS = [
-  { label: "Overview", to: "/dashboard" },
-  { label: "Feedback Queue", to: "/mentor/queue" },
+  { label: "Overview",       to: "/dashboard",    icon: <LayoutDashboard className={ICON} /> },
+  { label: "Feedback Queue", to: "/mentor/queue", icon: <GraduationCap className={ICON} /> },
 ];
 
 export default function MentorShell() {
-  return (
-    <DashboardLayout
-      navItems={MENTOR_NAV_ITEMS}
-      title="Mentor Dashboard"
-      topbarActions={<LogoutButton />}
-    />
-  );
+  return <DashboardLayout navItems={MENTOR_NAV_ITEMS} />;
 }

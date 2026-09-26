@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchApplicationsForPost,
@@ -11,6 +11,7 @@ import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { ArrowLeft } from "lucide-react";
 
 export default function ApplicationReview() {
   const { postId } = useParams();
@@ -31,10 +32,15 @@ export default function ApplicationReview() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-1 font-display text-xl font-semibold text-ink">
-        Applications
-      </h1>
-      <p className="mb-6 text-sm text-muted">
+      <Link
+        to="/founder/recruitment"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back to posts
+      </Link>
+
+      <h1 className="font-display text-xl font-semibold text-ink">Applications</h1>
+      <p className="mt-1 mb-6 text-sm text-muted">
         Review and respond to applicants for this role.
       </p>
 
@@ -46,7 +52,7 @@ export default function ApplicationReview() {
 
       {applications.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">
+          <p className="py-4 text-center text-sm text-muted">
             No applications for this post yet.
           </p>
         </Card>
@@ -66,8 +72,8 @@ export default function ApplicationReview() {
                     {app.applicant?.name?.[0] || "?"}
                   </div>
                 )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-base font-semibold text-ink">
                       {app.applicant?.name}
                     </h3>
@@ -75,7 +81,7 @@ export default function ApplicationReview() {
                   </div>
                   <p className="text-sm text-muted">{app.applicant?.email}</p>
                   {app.applicant?.skills?.length > 0 && (
-                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    <div className="mt-2 flex flex-wrap gap-1.5">
                       {app.applicant.skills.map((skill) => (
                         <span
                           key={skill}
@@ -87,7 +93,7 @@ export default function ApplicationReview() {
                     </div>
                   )}
                   {app.coverMessage && (
-                    <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-ink">
+                    <p className="mt-3 rounded-lg bg-paper p-3 text-sm text-ink">
                       "{app.coverMessage}"
                     </p>
                   )}

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -5,24 +6,30 @@ import { registerUser, clearAuthError } from "../../features/auth/authSlice";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { ShieldCheck } from "lucide-react";
 
 const ROLES = [
-  { value: "founder", label: "Founder" },
+  { value: "founder",   label: "Founder" },
   { value: "developer", label: "Developer / Designer" },
-  { value: "mentor", label: "Mentor" },
-  { value: "investor", label: "Investor" },
+  { value: "mentor",    label: "Mentor" },
+  { value: "investor",  label: "Investor" },
 ];
 
 export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { status, error } = useSelector((state) => state.auth);
+  const [selectedRole, setSelectedRole] = useState("");
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const roleField = watch("role") || selectedRole;
+  const needsVerification = roleField === "mentor" || roleField === "investor";
 
   const onSubmit = async (data) => {
     dispatch(clearAuthError());
@@ -81,29 +88,39 @@ export default function Register() {
             className={`rounded-lg border bg-surface px-3 py-2 text-sm text-ink
               focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
               ${errors.role ? "border-danger" : "border-border"}`}
-            {...register("role", { required: "Please select a role" })}
+            {...register("role", {
+              required: "Please select a role",
+              onChange: (e) => setSelectedRole(e.target.value),
+            })}
             defaultValue=""
           >
-            <option value="" disabled>
-              Select your role
-            </option>
+            <option value="" disabled>Select your role</option>
             {ROLES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
+              <option key={r.value} value={r.value}>{r.label}</option>
             ))}
           </select>
           {errors.role && <p className="text-xs text-danger">{errors.role.message}</p>}
         </div>
 
-        <Button type="submit" loading={status === "loading"} className="mt-2 w-full">
+        {needsVerification && (
+          <div className="flex items-start gap-2.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-xs text-muted">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold-dark" />
+            <p>
+              {roleField === "mentor" ? "Mentor" : "Investor"} accounts need
+              admin verification before you can access your dashboard. You can
+              sign up now — we&apos;ll notify you once you&apos;re verified.
+            </p>
+          </div>
+        )}
+
+        <Button type="submit" loading={status === "loading"} className="mt-1 w-full">
           Sign Up
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link to="/login" className="font-medium text-gold hover:underline">
+        <Link to="/login" className="font-medium text-gold-dark hover:underline">
           Log in
         </Link>
       </p>

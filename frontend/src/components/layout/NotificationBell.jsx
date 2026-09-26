@@ -70,8 +70,7 @@ export default function NotificationBell() {
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={`Notifications, ${unreadCount} unread`}
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors hover:bg-paper hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-      >
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-white/70 transition-colors hover:bg-white/5 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"      >
         <svg
           viewBox="0 0 24 24"
           className="h-5 w-5"

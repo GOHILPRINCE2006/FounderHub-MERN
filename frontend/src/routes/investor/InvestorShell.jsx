@@ -1,18 +1,14 @@
 import DashboardLayout from "../../components/layout/DashboardLayout";
-import LogoutButton from "../../components/common/LogoutButton";
+import { LayoutDashboard, Compass, Send } from "lucide-react";
+
+const ICON = "h-4 w-4";
 
 const INVESTOR_NAV_ITEMS = [
-  { label: "Overview", to: "/dashboard" },
-  { label: "Discover Startups", to: "/investor/startups" },
-  { label: "My Requests", to: "/investor/requests" },
+  { label: "Overview",          to: "/dashboard",         icon: <LayoutDashboard className={ICON} /> },
+  { label: "Discover Startups", to: "/investor/startups", icon: <Compass className={ICON} /> },
+  { label: "My Requests",       to: "/investor/requests", icon: <Send className={ICON} /> },
 ];
 
 export default function InvestorShell() {
-  return (
-    <DashboardLayout
-      navItems={INVESTOR_NAV_ITEMS}
-      title="Investor Dashboard"
-      topbarActions={<LogoutButton />}
-    />
-  );
+  return <DashboardLayout navItems={INVESTOR_NAV_ITEMS} />;
 }

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchStartupById } from "../../features/startup/startupSlice";
-import { applyToPost, clearApplicationError } from "../../features/application/applicationSlice";
+import {
+  applyToPost,
+  clearApplicationError,
+} from "../../features/application/applicationSlice";
 import axiosInstance from "../../api/axiosInstance";
 import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
@@ -10,6 +13,7 @@ import Button from "../../components/common/Button";
 import Textarea from "../../components/common/Textarea";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { ArrowLeft, Check } from "lucide-react";
 
 export default function StartupDetail() {
   const { id } = useParams();
@@ -28,8 +32,6 @@ export default function StartupDetail() {
     dispatch(fetchStartupById(id));
   }, [dispatch, id]);
 
-  // Recruitment posts aren't filterable by startup on the backend yet,
-  // so we fetch all open posts and filter client-side for this startup.
   useEffect(() => {
     const loadPosts = async () => {
       try {
@@ -60,21 +62,28 @@ export default function StartupDetail() {
 
   return (
     <div className="mx-auto max-w-3xl">
+      <Link
+        to="/opportunities"
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
+      >
+        <ArrowLeft className="h-4 w-4" /> Back to opportunities
+      </Link>
+
       <Card className="mb-6">
         <div className="flex items-start gap-4">
           {activeStartup.logo ? (
             <img
               src={activeStartup.logo}
               alt={activeStartup.name}
-              className="h-16 w-16 shrink-0 rounded-lg object-cover"
+              className="h-16 w-16 shrink-0 rounded-xl object-cover"
             />
           ) : (
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-navy text-lg font-semibold text-white">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-navy text-lg font-semibold text-white">
               {activeStartup.name[0]}
             </div>
           )}
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <h1 className="font-display text-xl font-semibold text-ink">
                 {activeStartup.name}
               </h1>
@@ -83,11 +92,16 @@ export default function StartupDetail() {
             <p className="text-sm text-muted">{activeStartup.industry}</p>
           </div>
         </div>
-        <p className="mt-4 text-sm text-ink">{activeStartup.description}</p>
+        <p className="mt-4 text-sm leading-relaxed text-ink">
+          {activeStartup.description}
+        </p>
         {activeStartup.requiredSkills?.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {activeStartup.requiredSkills.map((skill) => (
-              <span key={skill} className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
+              <span
+                key={skill}
+                className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
+              >
                 {skill}
               </span>
             ))}
@@ -95,7 +109,9 @@ export default function StartupDetail() {
         )}
       </Card>
 
-      <h2 className="mb-3 font-display text-lg font-semibold text-ink">Open Roles</h2>
+      <h2 className="mb-3 font-display text-base font-semibold text-ink">
+        Open Roles
+      </h2>
 
       {error && (
         <div className="mb-4">
@@ -107,7 +123,9 @@ export default function StartupDetail() {
         <Loader label="Loading roles" />
       ) : posts.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">No open roles at this startup right now.</p>
+          <p className="py-4 text-center text-sm text-muted">
+            No open roles at this startup right now.
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
@@ -124,7 +142,10 @@ export default function StartupDetail() {
                 {post.requiredSkills?.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {post.requiredSkills.map((skill) => (
-                      <span key={skill} className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
+                      <span
+                        key={skill}
+                        className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
+                      >
                         {skill}
                       </span>
                     ))}
@@ -132,17 +153,17 @@ export default function StartupDetail() {
                 )}
 
                 {alreadyApplied ? (
-                  <Badge tone="success" className="mt-3">
-                    Applied
-                  </Badge>
+                  <p className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-success">
+                    <Check className="h-4 w-4" /> Applied
+                  </p>
                 ) : user?.role !== "developer" ? null : isApplyingHere ? (
                   <div className="mt-3 flex flex-col gap-2">
                     <Textarea
                       label="Cover message (optional)"
+                      rows={3}
                       value={coverMessage}
                       onChange={(e) => setCoverMessage(e.target.value)}
-                      placeholder="Why are you a good fit for this role?"
-                      rows={3}
+                      placeholder="Why are you a good fit?"
                     />
                     <div className="flex gap-2">
                       <Button
@@ -150,7 +171,7 @@ export default function StartupDetail() {
                         loading={applyStatus === "loading"}
                         onClick={() => handleApply(post._id)}
                       >
-                        Submit Application
+                        Submit
                       </Button>
                       <Button
                         size="sm"
@@ -162,7 +183,11 @@ export default function StartupDetail() {
                     </div>
                   </div>
                 ) : (
-                  <Button size="sm" className="mt-3" onClick={() => setApplyingPostId(post._id)}>
+                  <Button
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => setApplyingPostId(post._id)}
+                  >
                     Apply
                   </Button>
                 )}

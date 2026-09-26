@@ -7,18 +7,22 @@ import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { Search } from "lucide-react";
 
 const STAGES = ["Idea", "MVP", "Funded", "Scaling"];
 
 export default function DiscoverStartups() {
   const dispatch = useDispatch();
-  const { allStartups, browseStatus, error } = useSelector((state) => state.startup);
+  const { allStartups, browseStatus, error } = useSelector(
+    (state) => state.startup
+  );
   const [keyword, setKeyword] = useState("");
   const [stage, setStage] = useState("");
 
   const search = (filters) => {
-    // Only send filters that have a value.
-    const params = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
+    const params = Object.fromEntries(
+      Object.entries(filters).filter(([, v]) => v)
+    );
     dispatch(fetchAllStartups(params));
   };
 
@@ -35,24 +39,27 @@ export default function DiscoverStartups() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-1 font-display text-xl font-semibold text-ink">Discover Startups</h1>
-      <p className="mb-6 text-sm text-muted">
-        Browse startups and send a connection request to the founders you want to talk to.
+      <h1 className="font-display text-xl font-semibold text-ink">
+        Discover Startups
+      </h1>
+      <p className="mt-1 mb-6 text-sm text-muted">
+        Browse startups and send connection requests to founders.
       </p>
 
       <form onSubmit={handleSubmit} className="mb-6 flex flex-wrap gap-2">
-        <input
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          placeholder="Search by name or description"
-          aria-label="Search startups"
-          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-        />
+        <div className="relative min-w-0 flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder="Search by name or description"
+            className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          />
+        </div>
         <select
           value={stage}
           onChange={(e) => setStage(e.target.value)}
-          aria-label="Filter by stage"
           className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
         >
           <option value="">All stages</option>
@@ -69,7 +76,7 @@ export default function DiscoverStartups() {
 
       {error && (
         <div className="mb-4">
-          <ErrorMessage message={error} onRetry={() => search({ keyword: keyword.trim(), stage })} />
+          <ErrorMessage message={error} />
         </div>
       )}
 
@@ -77,7 +84,9 @@ export default function DiscoverStartups() {
         <Loader label="Loading startups" />
       ) : allStartups.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">No startups match your search.</p>
+          <p className="py-4 text-center text-sm text-muted">
+            No startups match your search.
+          </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
@@ -85,9 +94,9 @@ export default function DiscoverStartups() {
             <Link
               key={startup._id}
               to={`/investor/startups/${startup._id}`}
-              className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              className="block focus:outline-none"
             >
-              <Card className="transition-shadow hover:shadow-md">
+              <Card className="transition-colors hover:border-border-strong">
                 <div className="flex items-start gap-4">
                   {startup.logo ? (
                     <img
@@ -109,9 +118,11 @@ export default function DiscoverStartups() {
                     </div>
                     <p className="text-xs text-muted">
                       {startup.industry}
-                      {startup.founder?.name && ` · Founded by ${startup.founder.name}`}
+                      {startup.founder?.name && ` · ${startup.founder.name}`}
                     </p>
-                    <p className="mt-2 line-clamp-2 text-sm text-ink">{startup.description}</p>
+                    <p className="mt-2 line-clamp-2 text-sm text-muted">
+                      {startup.description}
+                    </p>
                   </div>
                 </div>
               </Card>

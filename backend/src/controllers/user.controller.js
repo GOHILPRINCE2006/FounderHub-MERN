@@ -13,14 +13,45 @@ const getProfile = asyncHandler(async (req, res) => {
 
 // @route PUT /api/v1/users/profile
 const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = ["name", "skills", "portfolioLinks", "experience", "about"];
-  const updates = {};
+  const allowedFields = [
+    // common
+    "name", "phone", "location", "github", "linkedin", "website",
+    "skills", "experience", "about",
+    // role-specific
+    "availability", "expertise", "yearsOfExperience", "currentRole",
+    "company", "investmentFocus", "ticketSize",
+  ];
 
+  const updates = {};
   allowedFields.forEach((field) => {
-    if (req.body[field] !== undefined) {
-      updates[field] = req.body[field];
-    }
+    if (req.body[field] !== undefined) updates[field] = req.body[field];
   });
+
+  // Required fields
+  const required = ["name", "phone", "about"];
+  for (const f of required) {
+    if (f in updates && (!updates[f] || !String(updates[f]).trim())) {
+      throw new ApiError(400, `${f} is required`);
+    }
+  }
+
+  // Phone: exactly 10 digits
+  if (updates.phone !== undefined) {
+    const phoneStr = String(updates.phone).trim();
+    if (!/^\d{10}$/.test(phoneStr)) {
+      throw new ApiError(400, "Phone number must be exactly 10 digits");
+    }
+    updates.phone = phoneStr;
+  }
+
+  // yearsOfExperience: coerce to number, non-negative
+  if (updates.yearsOfExperience !== undefined && updates.yearsOfExperience !== "") {
+    const n = Number(updates.yearsOfExperience);
+    if (Number.isNaN(n) || n < 0) {
+      throw new ApiError(400, "Years of experience must be a non-negative number");
+    }
+    updates.yearsOfExperience = n;
+  }
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
     new: true,
@@ -34,18 +65,13 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 // @route POST /api/v1/users/avatar
 const uploadAvatar = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    throw new ApiError(400, "No image file provided");
-  }
-
+  if (!req.file) throw new ApiError(400, "No image file provided");
   const result = await uploadToCloudinary(req.file.buffer, "foundrhub/avatars");
-
   const updatedUser = await User.findByIdAndUpdate(
     req.user._id,
     { avatar: result.secure_url },
     { new: true }
   );
-
   return res
     .status(200)
     .json(new ApiResponse(200, updatedUser, "Avatar uploaded successfully"));

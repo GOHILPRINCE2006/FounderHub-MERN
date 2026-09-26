@@ -17,6 +17,7 @@ import Button from "../../components/common/Button";
 import Badge from "../../components/common/Badge";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import Loader from "../../components/common/Loader";
+import { Plus, X } from "lucide-react";
 
 export default function RecruitmentPosts() {
   const dispatch = useDispatch();
@@ -56,10 +57,7 @@ export default function RecruitmentPosts() {
 
   const toggleOpen = (post) => {
     dispatch(
-      updateRecruitmentPost({
-        id: post._id,
-        payload: { isOpen: !post.isOpen },
-      })
+      updateRecruitmentPost({ id: post._id, payload: { isOpen: !post.isOpen } })
     );
   };
 
@@ -71,17 +69,28 @@ export default function RecruitmentPosts() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-xl font-semibold text-ink">
             Recruitment Posts
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Open roles developers and designers can apply to.
+            Open roles developers can apply to.
           </p>
         </div>
-        <Button onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Cancel" : "New Post"}
+        <Button
+          variant={showForm ? "outline" : "primary"}
+          onClick={() => setShowForm((v) => !v)}
+        >
+          {showForm ? (
+            <>
+              <X className="h-4 w-4" /> Cancel
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4" /> New Post
+            </>
+          )}
         </Button>
       </div>
 
@@ -112,9 +121,11 @@ export default function RecruitmentPosts() {
               onChange={setRequiredSkills}
               placeholder="e.g. React, Tailwind"
             />
-            <Button type="submit" loading={actionStatus === "loading"} className="mt-1">
-              Publish Post
-            </Button>
+            <div className="flex justify-end">
+              <Button type="submit" loading={actionStatus === "loading"}>
+                Publish Post
+              </Button>
+            </div>
           </form>
         </Card>
       )}
@@ -123,7 +134,7 @@ export default function RecruitmentPosts() {
         <Loader label="Loading your posts" />
       ) : myPosts.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">
+          <p className="py-4 text-center text-sm text-muted">
             No recruitment posts yet. Create one to start receiving applications.
           </p>
         </Card>
@@ -132,8 +143,8 @@ export default function RecruitmentPosts() {
           {myPosts.map((post) => (
             <Card key={post._id}>
               <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-base font-semibold text-ink">
                       {post.roleTitle}
                     </h3>
@@ -154,16 +165,20 @@ export default function RecruitmentPosts() {
                   )}
                   <Link
                     to={`/founder/recruitment/${post._id}/applications`}
-                    className="mt-2 inline-block text-sm font-medium text-gold hover:underline"
+                    className="mt-3 inline-block text-sm font-medium text-gold-dark hover:underline"
                   >
-                    View Applications →
+                    View applications →
                   </Link>
                 </div>
                 <div className="flex shrink-0 gap-2">
                   <Button variant="outline" size="sm" onClick={() => toggleOpen(post)}>
                     {post.isOpen ? "Close" : "Reopen"}
                   </Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDelete(post._id)}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(post._id)}
+                  >
                     Delete
                   </Button>
                 </div>

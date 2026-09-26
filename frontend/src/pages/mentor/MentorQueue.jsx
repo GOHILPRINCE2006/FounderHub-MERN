@@ -13,10 +13,12 @@ import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 
 const formatDate = (iso) =>
-  new Date(iso).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  new Date(iso).toLocaleDateString([], {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
-// Form for one request. Keeps its own draft/submit state so typing in one
-// card never re-renders or affects the others.
 function FeedbackForm({ requestId }) {
   const dispatch = useDispatch();
   const [text, setText] = useState("");
@@ -28,10 +30,11 @@ function FeedbackForm({ requestId }) {
     setSubmitting(true);
     setFormError(null);
     try {
-      // On success the request moves to "Completed" and this form unmounts.
-      await dispatch(submitFeedback({ id: requestId, feedbackText: text })).unwrap();
+      await dispatch(
+        submitFeedback({ id: requestId, feedbackText: text })
+      ).unwrap();
     } catch (message) {
-      setFormError(typeof message === "string" ? message : "Failed to submit feedback");
+      setFormError(typeof message === "string" ? message : "Failed to submit");
       setSubmitting(false);
     }
   };
@@ -67,15 +70,18 @@ function RequestCard({ request }) {
           {startup?.name || "Deleted startup"}
         </h3>
         <Badge tone={isReviewed ? "success" : "warning"}>
-          {isReviewed ? "Reviewed" : "Awaiting your feedback"}
+          {isReviewed ? "Reviewed" : "Awaiting feedback"}
         </Badge>
       </div>
       <p className="text-xs text-muted">
         {[startup?.industry, startup?.stage].filter(Boolean).join(" · ")}
       </p>
-      {startup?.description && <p className="mt-2 text-sm text-ink">{startup.description}</p>}
+      {startup?.description && (
+        <p className="mt-2 text-sm text-ink">{startup.description}</p>
+      )}
       <p className="mt-2 text-xs text-muted">
-        Requested by {requestedBy?.name || "a founder"} on {formatDate(request.createdAt)}
+        Requested by {requestedBy?.name || "a founder"} on{" "}
+        {formatDate(request.createdAt)}
       </p>
 
       {isReviewed ? (
@@ -83,7 +89,7 @@ function RequestCard({ request }) {
           <p className="mb-1 text-xs font-medium text-muted">
             Your feedback · {formatDate(request.updatedAt)}
           </p>
-          <p className="whitespace-pre-wrap break-words rounded-lg bg-paper p-3 text-sm text-ink">
+          <p className="rounded-lg bg-paper p-3 text-sm text-ink">
             {request.feedbackText}
           </p>
         </div>
@@ -113,31 +119,39 @@ export default function MentorQueue() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-1 font-display text-xl font-semibold text-ink">Feedback Queue</h1>
-      <p className="mb-6 text-sm text-muted">Startups whose founders asked for your feedback.</p>
+      <h1 className="font-display text-xl font-semibold text-ink">
+        Feedback Queue
+      </h1>
+      <p className="mt-1 mb-6 text-sm text-muted">
+        Startups whose founders asked for your feedback.
+      </p>
 
       {!user?.isVerified && (
-        <div className="mb-4 rounded-lg border border-gold/40 bg-warning-bg px-4 py-3 text-sm text-gold-dark">
-          Your mentor account is awaiting verification. Founders can only request feedback from
-          verified mentors.
+        <div className="mb-4 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-sm text-gold-dark">
+          Your mentor account is awaiting verification.
         </div>
       )}
 
       {error && (
         <div className="mb-4">
-          <ErrorMessage message={error} onRetry={() => dispatch(fetchMentorQueue())} />
+          <ErrorMessage
+            message={error}
+            onRetry={() => dispatch(fetchMentorQueue())}
+          />
         </div>
       )}
 
       {queue.length === 0 ? (
         <Card>
-          <p className="text-center text-sm text-muted">No feedback requests yet.</p>
+          <p className="py-4 text-center text-sm text-muted">
+            No feedback requests yet.
+          </p>
         </Card>
       ) : (
         <>
           {pending.length > 0 && (
             <section className="mb-8">
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
                 Awaiting your feedback ({pending.length})
               </h2>
               <div className="flex flex-col gap-3">
@@ -150,7 +164,7 @@ export default function MentorQueue() {
 
           {completed.length > 0 && (
             <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
                 Completed ({completed.length})
               </h2>
               <div className="flex flex-col gap-3">

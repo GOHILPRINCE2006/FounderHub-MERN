@@ -15,8 +15,15 @@ import Textarea from "../../components/common/Textarea";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { Plus, X, Trash2 } from "lucide-react";
 
 const STATUSES = ["To-Do", "In Progress", "Done"];
+
+const COLUMN_STYLE = {
+  "To-Do":       "border-t-border-strong",
+  "In Progress": "border-t-gold",
+  Done:          "border-t-success",
+};
 
 export default function KanbanBoard() {
   const dispatch = useDispatch();
@@ -35,15 +42,11 @@ export default function KanbanBoard() {
   } = useForm();
 
   useEffect(() => {
-    if (!myStartup) {
-      dispatch(fetchMyStartup());
-    }
+    if (!myStartup) dispatch(fetchMyStartup());
   }, [dispatch, myStartup]);
 
   useEffect(() => {
-    if (myStartup?._id) {
-      dispatch(fetchTasksForStartup(myStartup._id));
-    }
+    if (myStartup?._id) dispatch(fetchTasksForStartup(myStartup._id));
   }, [dispatch, myStartup]);
 
   const onSubmit = async (data) => {
@@ -63,14 +66,10 @@ export default function KanbanBoard() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Delete this task?")) {
-      dispatch(deleteTask(id));
-    }
+    if (window.confirm("Delete this task?")) dispatch(deleteTask(id));
   };
 
-  if (!myStartup) {
-    return <Loader label="Loading startup" full />;
-  }
+  if (!myStartup) return <Loader label="Loading startup" full />;
 
   const columns = STATUSES.map((status) => ({
     status,
@@ -79,15 +78,24 @@ export default function KanbanBoard() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-xl font-semibold text-ink">Task Board</h1>
-          <p className="mt-1 text-sm text-muted">
-            Manage tasks for {myStartup.name}.
-          </p>
+          <p className="mt-1 text-sm text-muted">{myStartup.name}</p>
         </div>
-        <Button onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Cancel" : "New Task"}
+        <Button
+          variant={showForm ? "outline" : "primary"}
+          onClick={() => setShowForm((v) => !v)}
+        >
+          {showForm ? (
+            <>
+              <X className="h-4 w-4" /> Cancel
+            </>
+          ) : (
+            <>
+              <Plus className="h-4 w-4" /> New Task
+            </>
+          )}
         </Button>
       </div>
 
@@ -108,9 +116,9 @@ export default function KanbanBoard() {
             />
             <Textarea
               label="Description"
+              rows={2}
               placeholder="Details about this task"
               {...register("description")}
-              rows={2}
             />
             <div className="flex flex-col gap-1.5">
               <label htmlFor="assignedMember" className="text-sm font-medium text-ink">
@@ -130,9 +138,11 @@ export default function KanbanBoard() {
                 ))}
               </select>
             </div>
-            <Button type="submit" loading={actionStatus === "loading"} className="mt-1">
-              Create Task
-            </Button>
+            <div className="flex justify-end">
+              <Button type="submit" loading={actionStatus === "loading"}>
+                Create Task
+              </Button>
+            </div>
           </form>
         </Card>
       )}
@@ -143,16 +153,34 @@ export default function KanbanBoard() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {columns.map((col) => (
             <div key={col.status}>
-              <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
-                {col.status} ({col.tasks.length})
-              </h2>
+              <div
+                className={`mb-3 flex items-center justify-between border-t-2 ${COLUMN_STYLE[col.status]} pt-3`}
+              >
+                <h2 className="text-sm font-semibold text-ink">{col.status}</h2>
+                <span className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
+                  {col.tasks.length}
+                </span>
+              </div>
+
               <div className="flex flex-col gap-3">
                 {col.tasks.length === 0 ? (
-                  <p className="text-sm text-muted">No tasks</p>
+                  <p className="rounded-lg border border-dashed border-border py-6 text-center text-xs text-muted">
+                    No tasks
+                  </p>
                 ) : (
                   col.tasks.map((task) => (
-                    <Card key={task._id}>
-                      <h3 className="font-medium text-ink">{task.title}</h3>
+                    <Card key={task._id} className="p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium text-ink">{task.title}</h3>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(task._id)}
+                          className="text-muted hover:text-danger"
+                          aria-label="Delete task"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                       {task.description && (
                         <p className="mt-1 text-sm text-muted">{task.description}</p>
                       )}
@@ -161,28 +189,21 @@ export default function KanbanBoard() {
                           ? `Assigned to ${task.assignedMember.name}`
                           : "Unassigned"}
                       </p>
-                      <div className="mt-3 flex items-center gap-2">
-                        <select
-                          value={task.status}
-                          onChange={(e) =>
-                            dispatch(updateTaskStatus({ id: task._id, status: e.target.value }))
-                          }
-                          className="flex-1 rounded-lg border border-border bg-surface px-2 py-1 text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-                        >
-                          {STATUSES.map((s) => (
-                            <option key={s} value={s}>
-                              {s}
-                            </option>
-                          ))}
-                        </select>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleDelete(task._id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
+                      <select
+                        value={task.status}
+                        onChange={(e) =>
+                          dispatch(
+                            updateTaskStatus({ id: task._id, status: e.target.value })
+                          )
+                        }
+                        className="mt-3 w-full rounded-lg border border-border bg-surface px-2 py-1 text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                      >
+                        {STATUSES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
                     </Card>
                   ))
                 )}
