@@ -32,6 +32,8 @@ const registerUser = asyncHandler(async (req, res) => {
     name: user.name,
     email: user.email,
     role: user.role,
+    isVerified: user.isVerified,
+    avatar: user.avatar,
   };
 
   return res
@@ -64,11 +66,13 @@ const loginUser = asyncHandler(async (req, res) => {
   const token = generateToken(user._id);
   sendTokenCookie(res, token);
 
-  const userResponse = {
+    const userResponse = {
     _id: user._id,
     name: user.name,
     email: user.email,
     role: user.role,
+    isVerified: user.isVerified,
+    avatar: user.avatar,
   };
 
   return res

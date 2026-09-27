@@ -37,6 +37,8 @@ import AdminShell from "./admin/AdminShell";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminStartups from "../pages/admin/AdminStartups";
 import AdminVerifications from "../pages/admin/AdminVerifications";
+import FounderFunding from "../pages/founder/FundingRequests";
+import InvestorFunding from "../pages/investor/FundingRequests";
 
 export default function AppRoutes() {
   const dispatch = useDispatch();
@@ -81,6 +83,7 @@ export default function AppRoutes() {
             <Route path="/founder/chat" element={<TeamChat />} />
             <Route path="/founder/mentors" element={<MentorFeedback />} />
             <Route path="/founder/investors" element={<InvestorRequests />} />
+            <Route path="/founder/funding" element={<FounderFunding />} />
           </Route>
         </Route>
 
@@ -98,6 +101,7 @@ export default function AppRoutes() {
               element={<InvestorStartupDetail />}
             />
             <Route path="/investor/requests" element={<MyRequests />} />
+            <Route path="/investor/funding" element={<InvestorFunding />} />
           </Route>
         </Route>
       </Route>

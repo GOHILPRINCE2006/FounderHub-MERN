@@ -11,6 +11,7 @@ import investorReducer from "../features/investor/investorSlice";
 import notificationReducer from "../features/notification/notificationSlice";
 import progressReducer from "../features/progress/progressSlice";
 import adminReducer from "../features/admin/adminSlice";
+import fundingReducer from "../features/funding/fundingSlice";
 
 export const store = configureStore({
   reducer: {
@@ -26,5 +27,6 @@ export const store = configureStore({
     notification: notificationReducer,
     progress: progressReducer,
     admin: adminReducer,
+    funding: fundingReducer,
   },
 });

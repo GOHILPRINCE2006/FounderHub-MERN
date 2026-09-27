@@ -13,6 +13,7 @@ const investorRoutes = require("./investor.routes");
 const notificationRoutes = require("./notification.routes");
 const progressRoutes = require("./progress.routes");
 const adminRoutes = require("./admin.routes");
+const fundingRoutes = require("./funding.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -26,5 +27,5 @@ router.use("/investors", investorRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/progress", progressRoutes);
 router.use("/admin", adminRoutes);
-
+router.use("/funding", fundingRoutes);
 module.exports = router;

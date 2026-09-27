@@ -37,6 +37,17 @@ export const markAllNotificationsRead = createAsyncThunk(
   }
 );
 
+export const clearAllNotifications = createAsyncThunk(
+  "notification/clearAllNotifications",
+  async (_, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete("/notifications");
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to clear notifications");
+    }
+  }
+);
+
 const initialState = {
   items: [], // newest first
   status: "idle", // idle | loading | succeeded | failed
@@ -96,6 +107,14 @@ const notificationSlice = createSlice({
       .addCase(markAllNotificationsRead.rejected, (state, action) => {
         state.error = action.payload;
       })
+
+      .addCase(clearAllNotifications.fulfilled, (state) => {
+        state.items = [];
+      })
+      .addCase(clearAllNotifications.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
       // Don't leave one user's notifications in memory for the next login.
       .addCase(logoutUser.fulfilled, () => initialState);
   },

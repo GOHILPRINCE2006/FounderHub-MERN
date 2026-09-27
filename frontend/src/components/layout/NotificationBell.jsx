@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   markNotificationRead,
   markAllNotificationsRead,
+  clearAllNotifications,
   selectUnreadCount,
 } from "../../features/notification/notificationSlice";
 import { getNotificationRoute } from "../../features/notification/notificationRoutes";
@@ -95,15 +96,30 @@ export default function NotificationBell() {
         <div className="absolute right-0 top-full z-30 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-surface shadow-lg">
           <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <p className="font-display text-sm font-semibold text-ink">Notifications</p>
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={() => dispatch(markAllNotificationsRead())}
-                className="text-xs font-medium text-gold-dark hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-              >
-                Mark all as read
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => dispatch(markAllNotificationsRead())}
+                  className="text-xs font-medium text-gold-dark hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                >
+                  Mark all as read
+                </button>
+              )}
+              {items.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm("Clear all notifications? This cannot be undone.")) {
+                      dispatch(clearAllNotifications());
+                    }
+                  }}
+                  className="text-xs font-medium text-danger hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="max-h-96 overflow-y-auto">

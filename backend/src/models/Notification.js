@@ -20,6 +20,9 @@ const notificationSchema = new mongoose.Schema(
         "INVESTOR_REQUEST_REJECTED",
         "VERIFICATION_APPROVED",
         "VERIFICATION_REJECTED",
+        "FUNDING_REQUEST_RECEIVED",
+        "FUNDING_REQUEST_ACCEPTED",
+        "FUNDING_REQUEST_DECLINED",
       ],
       required: true,
     },
@@ -27,8 +30,6 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    // Optional frontend route hint, e.g. "/startups/<id>" — left as a plain
-    // string so the frontend (Phase 14) decides how to route it.
     link: {
       type: String,
       default: "",
