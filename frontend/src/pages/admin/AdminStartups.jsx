@@ -12,6 +12,7 @@ import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 export default function AdminStartups() {
   const dispatch = useDispatch();
@@ -57,7 +58,7 @@ export default function AdminStartups() {
       )}
 
       {startupsStatus === "loading" && startups.length === 0 ? (
-        <Loader label="Loading startups" />
+        <SkeletonList count={4} />
       ) : startups.length === 0 ? (
         <Card>
           <p className="py-4 text-center text-sm text-muted">No startups yet.</p>

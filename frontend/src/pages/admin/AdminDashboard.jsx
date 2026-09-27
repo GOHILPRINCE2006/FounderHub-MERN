@@ -4,6 +4,7 @@ import { fetchAdminStats } from "../../features/admin/adminSlice";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonStats } from "../../components/common/Skeleton";
 import {
   Users, Rocket, FileText, TrendingUp, ShieldCheck, Ban,
 } from "lucide-react";
@@ -36,7 +37,20 @@ export default function AdminDashboard() {
   }, [dispatch]);
 
   if (statsStatus === "loading" && !stats) {
-    return <Loader label="Loading platform stats" full />;
+    return (
+      <div className="mx-auto max-w-5xl">
+        <h1 className="font-display text-xl font-semibold text-ink">
+          Platform overview
+        </h1>
+        <p className="mt-1 mb-6 text-sm text-muted">
+          Loading live counts…
+        </p>
+        <SkeletonStats count={4} />
+        <div className="mt-8">
+          <SkeletonStats count={2} />
+        </div>
+      </div>
+    );
   }
 
   if (!stats) {

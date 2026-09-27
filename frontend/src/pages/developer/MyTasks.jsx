@@ -4,6 +4,8 @@ import { fetchMyTasks, updateTaskStatus } from "../../features/task/taskSlice";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonColumn } from "../../components/common/Skeleton";
+
 
 const STATUSES = ["To-Do", "In Progress", "Done"];
 
@@ -22,7 +24,24 @@ export default function MyTasks() {
   }, [dispatch]);
 
   if (fetchStatus === "loading") {
-    return <Loader label="Loading your tasks" full />;
+    return (
+      <div className="mx-auto max-w-4xl">
+        <h1 className="font-display text-xl font-semibold text-ink">My Tasks</h1>
+        <p className="mt-1 mb-6 text-sm text-muted">
+          Tasks assigned to you across your teams.
+        </p>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          {["To-Do", "In Progress", "Done"].map((s) => (
+            <div key={s}>
+              <div className="mb-3 border-t-2 border-t-border-strong pt-3">
+                <h2 className="text-sm font-semibold text-ink">{s}</h2>
+              </div>
+              <SkeletonColumn count={2} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const grouped = STATUSES.map((status) => ({

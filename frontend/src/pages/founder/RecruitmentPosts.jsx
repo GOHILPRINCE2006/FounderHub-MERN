@@ -75,7 +75,7 @@ export default function RecruitmentPosts() {
             Recruitment Posts
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Open roles developers can apply to.
+            Open roles developers can apply to. Each post is attached to your startup.
           </p>
         </div>
         <Button

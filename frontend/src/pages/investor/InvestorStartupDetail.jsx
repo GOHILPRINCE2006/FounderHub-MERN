@@ -14,7 +14,7 @@ import Button from "../../components/common/Button";
 import Textarea from "../../components/common/Textarea";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock } from "lucide-react";
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString([], {
@@ -42,16 +42,11 @@ function Person({ person, label }) {
           <p className="text-sm font-medium text-ink">{person.name}</p>
           <Badge tone={label === "Founder" ? "info" : "neutral"}>{label}</Badge>
         </div>
-        {person.about && (
-          <p className="mt-0.5 text-xs text-muted">{person.about}</p>
-        )}
+        {person.about && <p className="mt-0.5 text-xs text-muted">{person.about}</p>}
         {person.skills?.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {person.skills.map((skill) => (
-              <span
-                key={skill}
-                className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
-              >
+              <span key={skill} className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
                 {skill}
               </span>
             ))}
@@ -87,7 +82,6 @@ function ConnectForm({ startupId, previouslyDeclinedOn }) {
       {previouslyDeclinedOn && (
         <p className="text-sm text-muted">
           The founder declined your earlier request on {previouslyDeclinedOn}.
-          You can send a new one.
         </p>
       )}
       <Textarea
@@ -112,18 +106,12 @@ export default function InvestorStartupDetail() {
   const { id } = useParams();
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
+  const { activeStartup, detailStatus, error: startupError } = useSelector(
+    (state) => state.startup
+  );
   const {
-    activeStartup,
-    detailStatus,
-    error: startupError,
-  } = useSelector((state) => state.startup);
-  const {
-    team,
-    teamFor,
-    teamStatus,
-    myRequests,
-    myRequestsStatus,
-    error,
+    team, teamFor, teamStatus,
+    myRequests, myRequestsStatus, error,
   } = useSelector((state) => state.investor);
 
   useEffect(() => {
@@ -150,6 +138,7 @@ export default function InvestorStartupDetail() {
   const requestsLoading =
     myRequestsStatus === "idle" ||
     (myRequestsStatus === "loading" && myRequests.length === 0);
+  const canViewPrivate = startup.canViewPrivate === true;
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -160,6 +149,7 @@ export default function InvestorStartupDetail() {
         <ArrowLeft className="h-4 w-4" /> Back to startups
       </Link>
 
+      {/* PUBLIC */}
       <Card className="mb-6">
         <div className="flex items-start gap-4">
           {startup.logo ? (
@@ -181,11 +171,59 @@ export default function InvestorStartupDetail() {
               <Badge status={startup.stage} />
             </div>
             <p className="text-sm text-muted">{startup.industry}</p>
+            {startup.location && (
+              <p className="text-xs text-muted">{startup.location}</p>
+            )}
           </div>
         </div>
-        <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-ink">
-          {startup.description}
-        </p>
+        {startup.tagline && (
+          <p className="mt-4 text-sm text-ink">{startup.tagline}</p>
+        )}
+      </Card>
+
+      {/* PRIVATE */}
+      <Card className="mb-6">
+        {canViewPrivate ? (
+          <>
+            <h2 className="mb-3 font-display text-sm font-semibold text-ink">
+              Private details
+            </h2>
+            <div className="flex flex-col gap-4 text-sm">
+              {startup.problem && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Problem</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{startup.problem}</p>
+                </div>
+              )}
+              {startup.solution && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Solution</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{startup.solution}</p>
+                </div>
+              )}
+              {startup.traction && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Traction</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{startup.traction}</p>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-paper">
+              <Lock className="h-4 w-4 text-muted" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-ink">
+                Private details are locked
+              </p>
+              <p className="text-xs text-muted">
+                Unlock after the founder accepts your connection request.
+              </p>
+            </div>
+          </div>
+        )}
       </Card>
 
       {error && (
@@ -213,14 +251,12 @@ export default function InvestorStartupDetail() {
         )}
       </Card>
 
-      <h2 className="mb-3 font-display text-base font-semibold text-ink">
-        Connect
-      </h2>
+      <h2 className="mb-3 font-display text-base font-semibold text-ink">Connect</h2>
       <Card>
         {!user?.isVerified ? (
           <p className="text-sm text-gold-dark">
-            Your investor account is awaiting verification. You can browse
-            startups now, but connection requests unlock once verified.
+            Your investor account is awaiting verification. You can browse now,
+            but connection requests unlock once verified.
           </p>
         ) : requestsLoading ? (
           <Loader label="Checking your requests" />
@@ -228,8 +264,7 @@ export default function InvestorStartupDetail() {
           <div className="flex items-center gap-3">
             <Badge status="Pending" />
             <p className="text-sm text-muted">
-              You sent a request on {formatDate(latest.createdAt)}. Awaiting
-              response.
+              You sent a request on {formatDate(latest.createdAt)}. Awaiting response.
             </p>
           </div>
         ) : latest?.status === "Accepted" ? (

@@ -6,17 +6,24 @@ const startupSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      // Note: not unique at DB level on purpose, so multiple startups
-      // per founder can be supported later without a schema migration.
     },
+
+    // --- Public ---
     name: {
       type: String,
       required: [true, "Startup name is required"],
       trim: true,
     },
-    description: {
+    tagline: {
       type: String,
-      required: [true, "Description is required"],
+      default: "",
+      trim: true,
+      maxlength: 120,
+    },
+    description: {
+      // kept for backward compatibility; no longer edited from the form
+      type: String,
+      default: "",
     },
     industry: {
       type: String,
@@ -27,11 +34,25 @@ const startupSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    location: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    website: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     requiredSkills: {
       type: [String],
       default: [],
     },
     requiredRoles: {
+      type: [String],
+      default: [],
+    },
+    lookingFor: {
       type: [String],
       default: [],
     },
@@ -42,7 +63,40 @@ const startupSchema = new mongoose.Schema(
     },
     isModerated: {
       type: Boolean,
-      default: true, // false = hidden/flagged by admin (Phase 13)
+      default: true,
+    },
+
+    // --- Private (visible only to founder, team, approved investor,
+    //     requesting mentor, admin) ---
+    problem: {
+      type: String,
+      default: "",
+    },
+    solution: {
+      type: String,
+      default: "",
+    },
+    teamSize: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+    foundingYear: {
+      type: Number,
+      default: null,
+    },
+    fundingStatus: {
+      type: String,
+      enum: ["", "Bootstrapped", "Pre-seed", "Seed", "Raised"],
+      default: "",
+    },
+    traction: {
+      type: String,
+      default: "",
+    },
+    technologies: {
+      type: [String],
+      default: [],
     },
 
     teamMembers: {

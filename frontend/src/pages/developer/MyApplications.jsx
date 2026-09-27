@@ -7,6 +7,8 @@ import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonList } from "../../components/common/Skeleton";
+
 
 export default function MyApplications() {
   const dispatch = useDispatch();
@@ -19,7 +21,17 @@ export default function MyApplications() {
   }, [dispatch]);
 
   if (fetchStatus === "loading") {
-    return <Loader label="Loading your applications" full />;
+    return (
+      <div className="mx-auto max-w-3xl">
+        <h1 className="font-display text-xl font-semibold text-ink">
+          My Applications
+        </h1>
+        <p className="mt-1 mb-6 text-sm text-muted">
+          Track the status of roles you've applied to.
+        </p>
+        <SkeletonList count={3} withAvatar={false} />
+      </div>
+    );
   }
 
   return (

@@ -13,6 +13,7 @@ import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import { Search } from "lucide-react";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 const ROLES = [
   { value: "", label: "All roles" },
@@ -93,7 +94,7 @@ export default function AdminUsers() {
       )}
 
       {usersStatus === "loading" && users.length === 0 ? (
-        <Loader label="Loading users" />
+        <SkeletonList count={5} />
       ) : users.length === 0 ? (
         <Card>
           <p className="py-4 text-center text-sm text-muted">No users found.</p>

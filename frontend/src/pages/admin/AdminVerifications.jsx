@@ -11,6 +11,8 @@ import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonList } from "../../components/common/Skeleton";
+
 
 export default function AdminVerifications() {
   const dispatch = useDispatch();
@@ -79,9 +81,9 @@ export default function AdminVerifications() {
           <ErrorMessage message={error} />
         </div>
       )}
-
+      
       {verificationsStatus === "loading" && list.length === 0 ? (
-        <Loader label="Loading verifications" />
+        <SkeletonList count={3} />
       ) : list.length === 0 ? (
         <Card>
           <p className="py-4 text-center text-sm text-muted">

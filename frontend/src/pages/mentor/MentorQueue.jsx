@@ -11,6 +11,7 @@ import Button from "../../components/common/Button";
 import Textarea from "../../components/common/Textarea";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
+import { SkeletonList } from "../../components/common/Skeleton";
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString([], {
@@ -111,7 +112,17 @@ export default function MentorQueue() {
   }, [dispatch]);
 
   if (queueStatus === "idle" || (queueStatus === "loading" && queue.length === 0)) {
-    return <Loader label="Loading your queue" full />;
+    return (
+      <div className="mx-auto max-w-3xl">
+        <h1 className="font-display text-xl font-semibold text-ink">
+          Feedback Queue
+        </h1>
+        <p className="mt-1 mb-6 text-sm text-muted">
+          Startups whose founders asked for your feedback.
+        </p>
+        <SkeletonList count={3} withAvatar={false} />
+      </div>
+    );
   }
 
   const pending = queue.filter((r) => r.status === "Requested");

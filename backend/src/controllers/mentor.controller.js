@@ -10,7 +10,7 @@ const sendNotification = require("../utils/sendNotification");
 // @access Public (founders browse verified mentors to select from)
 const getVerifiedMentors = asyncHandler(async (req, res) => {
   const mentors = await User.find({ role: "mentor", isVerified: true }).select(
-    "name email avatar skills about experience"
+    "name email avatar skills about experience expertise yearsOfExperience currentRole company linkedin"
   );
 
   return res

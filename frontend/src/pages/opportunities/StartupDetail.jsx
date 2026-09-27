@@ -13,7 +13,7 @@ import Button from "../../components/common/Button";
 import Textarea from "../../components/common/Textarea";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Lock } from "lucide-react";
 
 export default function StartupDetail() {
   const { id } = useParams();
@@ -60,15 +60,18 @@ export default function StartupDetail() {
     return <Loader label="Loading startup" full />;
   }
 
+  const canViewPrivate = activeStartup.canViewPrivate === true;
+
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        to="/opportunities"
+        to="/browse-startups"
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to opportunities
+        <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
+      {/* PUBLIC */}
       <Card className="mb-6">
         <div className="flex items-start gap-4">
           {activeStartup.logo ? (
@@ -90,11 +93,29 @@ export default function StartupDetail() {
               <Badge status={activeStartup.stage} />
             </div>
             <p className="text-sm text-muted">{activeStartup.industry}</p>
+            {activeStartup.location && (
+              <p className="text-xs text-muted">{activeStartup.location}</p>
+            )}
           </div>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-ink">
-          {activeStartup.description}
-        </p>
+
+        {activeStartup.tagline && (
+          <p className="mt-4 text-sm text-ink">{activeStartup.tagline}</p>
+        )}
+
+        {activeStartup.lookingFor?.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            {activeStartup.lookingFor.map((l) => (
+              <span
+                key={l}
+                className="rounded-full bg-warning-bg px-2 py-0.5 text-xs font-medium text-gold-dark"
+              >
+                Looking for: {l}
+              </span>
+            ))}
+          </div>
+        )}
+
         {activeStartup.requiredSkills?.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {activeStartup.requiredSkills.map((skill) => (
@@ -105,6 +126,86 @@ export default function StartupDetail() {
                 {skill}
               </span>
             ))}
+          </div>
+        )}
+      </Card>
+
+      {/* PRIVATE */}
+      <Card className="mb-6">
+        {canViewPrivate ? (
+          <>
+            <h2 className="mb-3 font-display text-sm font-semibold text-ink">
+              Private details
+            </h2>
+            <div className="flex flex-col gap-4 text-sm">
+              {activeStartup.problem && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Problem</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.problem}</p>
+                </div>
+              )}
+              {activeStartup.solution && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Solution</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.solution}</p>
+                </div>
+              )}
+              {activeStartup.traction && (
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Traction</p>
+                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.traction}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
+                {activeStartup.teamSize > 0 && (
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted">Team size</p>
+                    <p className="mt-1 text-ink">{activeStartup.teamSize}</p>
+                  </div>
+                )}
+                {activeStartup.foundingYear && (
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted">Founded</p>
+                    <p className="mt-1 text-ink">{activeStartup.foundingYear}</p>
+                  </div>
+                )}
+                {activeStartup.fundingStatus && (
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted">Funding</p>
+                    <p className="mt-1 text-ink">{activeStartup.fundingStatus}</p>
+                  </div>
+                )}
+              </div>
+              {activeStartup.technologies?.length > 0 && (
+                <div className="border-t border-border pt-4">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted">Stack</p>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {activeStartup.technologies.map((t) => (
+                      <span
+                        key={t}
+                        className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-center gap-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-paper">
+              <Lock className="h-4 w-4 text-muted" />
+            </span>
+            <div>
+              <p className="text-sm font-medium text-ink">
+                Private details are locked
+              </p>
+              <p className="text-xs text-muted">
+                Unlock by joining the team, or when the founder approves your connection.
+              </p>
+            </div>
           </div>
         )}
       </Card>
@@ -142,10 +243,7 @@ export default function StartupDetail() {
                 {post.requiredSkills?.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {post.requiredSkills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
-                      >
+                      <span key={skill} className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
                         {skill}
                       </span>
                     ))}

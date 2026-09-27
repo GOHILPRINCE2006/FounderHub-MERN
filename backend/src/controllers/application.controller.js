@@ -77,7 +77,10 @@ const getApplicationsForPost = asyncHandler(async (req, res) => {
   }
 
   const applications = await Application.find({ recruitmentPost: req.params.postId })
-    .populate("applicant", "name email avatar skills")
+    .populate(
+      "applicant",
+      "name email avatar phone location skills experience about github linkedin website role availability"
+    )
     .sort({ createdAt: -1 });
 
   return res
