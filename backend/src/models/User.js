@@ -24,8 +24,14 @@ const userSchema = new mongoose.Schema(
     },
     avatar: { type: String, default: "" },
 
-    // --- Common profile (batch 1) ---
-    phone:    { type: String, default: "", trim: true },
+    // --- Common profile ---
+    phone: {
+      type: String,
+      default: "",
+      trim: true,
+      unique: true,
+      sparse: true,
+    },
     location: { type: String, default: "", trim: true },
     github:   { type: String, default: "", trim: true },
     linkedin: { type: String, default: "", trim: true },
@@ -36,24 +42,24 @@ const userSchema = new mongoose.Schema(
     experience: { type: String, default: "" },
     about:      { type: String, default: "" },
 
-    // --- Role-specific (batch 2) ---
-
-    // Developer
+    // --- Developer ---
     availability: {
       type: String,
       enum: ["", "Full-time", "Part-time", "Internship"],
       default: "",
     },
 
-    // Mentor
+    // --- Mentor ---
     expertise:         { type: String, default: "", trim: true },
     yearsOfExperience: { type: Number, default: 0, min: 0 },
     currentRole:       { type: String, default: "", trim: true },
+    // Price per session in INR. Only meaningful for mentors.
+    sessionPrice:      { type: Number, default: 0, min: 0 },
 
-    // Mentor + Investor shared
+    // --- Mentor + Investor shared ---
     company: { type: String, default: "", trim: true },
 
-    // Investor
+    // --- Investor ---
     investmentFocus: { type: String, default: "", trim: true },
     ticketSize:      { type: String, default: "", trim: true },
 

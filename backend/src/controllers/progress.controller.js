@@ -5,23 +5,24 @@ const Task = require("../models/Task");
 const RecruitmentPost = require("../models/RecruitmentPost");
 const Application = require("../models/Application");
 const MentorFeedback = require("../models/MentorFeedback");
+const InvestorConnection = require("../models/InvestorConnection");
+const Payment = require("../models/Payment");
 
 // @route GET /api/v1/progress/startup/:startupId
-// @access Founder or team members of that startup only
-//
-// Deliberately kept simple per spec ("do not overcomplicate analytics") —
-// everything is computed on read from existing collections. No new
-// write-time bookkeeping (e.g. a dedicated ActivityLog collection) was
-// introduced for this.
+// @access Founder or team members of that startup
 const getStartupProgress = asyncHandler(async (req, res) => {
   const { startup } = await checkStartupAccess(req.params.startupId, req.user._id);
 
-  const [tasks, recruitmentPosts, applications, mentorFeedback] = await Promise.all([
-    Task.find({ startup: startup._id }).populate("assignedMember", "name avatar"),
-    RecruitmentPost.find({ startup: startup._id }),
-    Application.find({ startup: startup._id }),
-    MentorFeedback.find({ startup: startup._id }).populate("mentor", "name"),
-  ]);
+  const [tasks, recruitmentPosts, applications, mentorFeedback, investments, payments] =
+    await Promise.all([
+      Task.find({ startup: startup._id }).populate("assignedMember", "name avatar"),
+      RecruitmentPost.find({ startup: startup._id }),
+      Application.find({ startup: startup._id }),
+      MentorFeedback.find({ startup: startup._id }).populate("mentor", "name"),
+      InvestorConnection.find({ startup: startup._id, status: "Invested" })
+        .populate("investor", "name avatar company"),
+      Payment.find({ paymentType: "investment", startup: startup._id, status: "Paid" }),
+    ]);
 
   // --- Task completion ---
   const totalTasks = tasks.length;
@@ -30,7 +31,7 @@ const getStartupProgress = asyncHandler(async (req, res) => {
   const todoCount = tasks.filter((t) => t.status === "To-Do").length;
   const completionPercentage = totalTasks === 0 ? 0 : Math.round((doneCount / totalTasks) * 100);
 
-  // --- Team contribution overview (per assigned member) ---
+  // --- Team contribution ---
   const contributionMap = {};
   tasks.forEach((task) => {
     if (!task.assignedMember) return;
@@ -47,9 +48,7 @@ const getStartupProgress = asyncHandler(async (req, res) => {
       };
     }
     contributionMap[id].assigned += 1;
-    if (task.status === "Done") {
-      contributionMap[id].completed += 1;
-    }
+    if (task.status === "Done") contributionMap[id].completed += 1;
   });
   const teamContribution = Object.values(contributionMap);
 
@@ -61,9 +60,39 @@ const getStartupProgress = asyncHandler(async (req, res) => {
   const acceptedApplications = applications.filter((a) => a.status === "Accepted").length;
   const rejectedApplications = applications.filter((a) => a.status === "Rejected").length;
 
-  // --- Activity timeline (merged from existing timestamps, most recent 20) ---
-  const activity = [];
+  // --- Funding ledger ---
+  const moneyIn = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
 
+  // Mentor payments for this startup (via mentor requests on this startup)
+  const mentorPayments = await Payment.find({
+    paymentType: "mentor",
+    status: "Paid",
+  }).populate({
+    path: "mentorRequest",
+    match: { startup: startup._id },
+    select: "startup",
+  });
+
+  // Filter: only keep payments where the request belongs to this startup.
+  const mentorPaymentsForStartup = mentorPayments.filter((p) => p.mentorRequest);
+
+  const moneyOut = mentorPaymentsForStartup.reduce((sum, p) => sum + (p.amount || 0), 0);
+  const net = moneyIn - moneyOut;
+
+  const fundingByInvestor = investments.map((inv) => ({
+    investor: {
+      _id: inv.investor?._id,
+      name: inv.investor?.name,
+      avatar: inv.investor?.avatar,
+      company: inv.investor?.company,
+    },
+    amount: inv.finalAmount || inv.proposedAmount,
+    equityPercent: inv.finalEquity ?? inv.proposedEquity,
+    investedAt: inv.paidAt,
+  }));
+
+  // --- Activity timeline ---
+  const activity = [];
   tasks.forEach((task) => {
     activity.push({
       type: "TASK_CREATED",
@@ -71,7 +100,6 @@ const getStartupProgress = asyncHandler(async (req, res) => {
       timestamp: task.createdAt,
     });
   });
-
   applications.forEach((application) => {
     activity.push({
       type: "APPLICATION_SUBMITTED",
@@ -86,20 +114,19 @@ const getStartupProgress = asyncHandler(async (req, res) => {
       });
     }
   });
-
-  mentorFeedback.forEach((feedback) => {
+  mentorFeedback.forEach((fb) => {
     activity.push({
       type: "MENTOR_FEEDBACK_REQUESTED",
-      message: `Mentor feedback requested from ${feedback.mentor?.name || "a mentor"}`,
-      timestamp: feedback.createdAt,
+      message: `Mentor feedback requested from ${fb.mentor?.name || "a mentor"}`,
+      timestamp: fb.createdAt,
     });
-    if (feedback.status === "Reviewed") {
-      activity.push({
-        type: "MENTOR_FEEDBACK_RECEIVED",
-        message: `${feedback.mentor?.name || "Mentor"} submitted feedback`,
-        timestamp: feedback.updatedAt,
-      });
-    }
+  });
+  investments.forEach((inv) => {
+    activity.push({
+      type: "INVESTMENT_RECEIVED",
+      message: `${inv.investor?.name || "An investor"} invested ₹${(inv.finalAmount || 0).toLocaleString("en-IN")}`,
+      timestamp: inv.paidAt,
+    });
   });
 
   activity.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -123,6 +150,12 @@ const getStartupProgress = asyncHandler(async (req, res) => {
       accepted: acceptedApplications,
       rejected: rejectedApplications,
     },
+    funding: {
+      moneyIn,
+      moneyOut,
+      net,
+      investments: fundingByInvestor,
+    },
     activityTimeline,
   };
 
@@ -131,6 +164,4 @@ const getStartupProgress = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, progress, "Startup progress fetched successfully"));
 });
 
-module.exports = {
-  getStartupProgress,
-};
+module.exports = { getStartupProgress };

@@ -2,7 +2,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import {
   Rocket, Users, Kanban, MessageSquare, GraduationCap, TrendingUp,
-  Briefcase, Compass, Search, ShieldCheck,
+  Briefcase, Compass, Search, ShieldCheck, AlertCircle,
 } from "lucide-react";
 
 const QUICK_LINKS = {
@@ -39,11 +39,42 @@ const ROLE_LABEL = {
   admin: "Admin",
 };
 
+// Check which required profile fields are still missing for the user's role.
+function getMissingFields(user) {
+  if (!user) return [];
+  const missing = [];
+
+  if (!user.phone) missing.push("phone");
+  if (!user.about) missing.push("about");
+
+  if (user.role === "developer") {
+    if (!user.skills?.length) missing.push("skills");
+    if (!user.availability) missing.push("availability");
+  }
+
+  if (user.role === "mentor") {
+    if (!user.expertise) missing.push("expertise");
+    if (!user.currentRole) missing.push("currentRole");
+    if (!user.company) missing.push("company");
+    if (!user.yearsOfExperience) missing.push("yearsOfExperience");
+  }
+
+  if (user.role === "investor") {
+    if (!user.investmentFocus) missing.push("investmentFocus");
+    if (!user.company) missing.push("company");
+  }
+
+  return missing;
+}
+
 export default function DashboardHome() {
   const { user } = useSelector((state) => state.auth);
   const links = QUICK_LINKS[user?.role] || [];
   const awaitingVerification =
     (user?.role === "mentor" || user?.role === "investor") && !user?.isVerified;
+
+  const missing = getMissingFields(user);
+  const profileIncomplete = missing.length > 0 && user?.role !== "admin";
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -59,9 +90,32 @@ export default function DashboardHome() {
               {user.role === "mentor"
                 ? "receive feedback requests from founders"
                 : "send connection requests to startups"}.
-              You'll get a notification once it's approved.
+              You&apos;ll get a notification once it&apos;s approved.
             </p>
           </div>
+        </div>
+      )}
+
+      {profileIncomplete && (
+        <div className="mb-6 flex items-start justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-gold-dark" />
+            <div>
+              <p className="text-sm font-medium text-ink">
+                Complete your profile
+              </p>
+              <p className="mt-0.5 text-sm text-muted">
+                {missing.length} field{missing.length === 1 ? "" : "s"} still missing
+                — finish your profile so others can find and trust you.
+              </p>
+            </div>
+          </div>
+          <Link
+            to="/profile"
+            className="shrink-0 rounded-lg bg-gold px-3 py-1.5 text-xs font-medium text-ink hover:bg-gold-dark"
+          >
+            Complete
+          </Link>
         </div>
       )}
 

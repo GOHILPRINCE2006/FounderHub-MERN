@@ -9,10 +9,10 @@ import ErrorMessage from "../../components/common/ErrorMessage";
 import { ShieldCheck } from "lucide-react";
 
 const ROLES = [
-  { value: "founder",   label: "Founder" },
+  { value: "founder", label: "Founder" },
   { value: "developer", label: "Developer / Designer" },
-  { value: "mentor",    label: "Mentor" },
-  { value: "investor",  label: "Investor" },
+  { value: "mentor", label: "Mentor" },
+  { value: "investor", label: "Investor" },
 ];
 
 export default function Register() {
@@ -66,6 +66,25 @@ export default function Register() {
           placeholder="you@example.com"
           error={errors.email?.message}
           {...register("email", { required: "Email is required" })}
+        />
+
+        <Input
+          label="Phone"
+          type="text"
+          inputMode="numeric"
+          maxLength={10}
+          placeholder="10-digit number"
+          error={errors.phone?.message}
+          {...register("phone", {
+            required: "Phone is required",
+            pattern: {
+              value: /^\d{10}$/,
+              message: "Phone must be exactly 10 digits",
+            },
+          })}
+          onInput={(e) => {
+            e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+          }}
         />
 
         <Input

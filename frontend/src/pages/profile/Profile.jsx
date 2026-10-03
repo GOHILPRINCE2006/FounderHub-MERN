@@ -56,6 +56,7 @@ export default function Profile() {
         availability: profile.availability || "",
         expertise: profile.expertise || "",
         yearsOfExperience: profile.yearsOfExperience ?? "",
+        sessionPrice: profile.sessionPrice ?? "",  
         currentRole: profile.currentRole || "",
         company: profile.company || "",
         investmentFocus: profile.investmentFocus || "",
@@ -98,6 +99,8 @@ export default function Profile() {
         data.yearsOfExperience === "" ? 0 : Number(data.yearsOfExperience);
       payload.currentRole = data.currentRole || "";
       payload.company = data.company || "";
+      payload.sessionPrice =
+      data.sessionPrice === "" ? 0 : Number(data.sessionPrice); 
     } else if (profile?.role === "investor") {
       payload.investmentFocus = data.investmentFocus || "";
       payload.ticketSize = data.ticketSize || "";
@@ -247,7 +250,7 @@ export default function Profile() {
             </section>
           )}
 
-          {role === "mentor" && (
+                    {role === "mentor" && (
             <section>
               <h3 className="mb-3 font-display text-sm font-semibold text-ink">
                 Mentor details
@@ -283,6 +286,17 @@ export default function Profile() {
                   placeholder="e.g. Product management, SaaS, Fundraising"
                   error={errors.expertise?.message}
                   {...register("expertise", { required: "Expertise is required" })}
+                />
+                <Input
+                  label="Session price (INR) *"
+                  type="number"
+                  min={1}
+                  placeholder="e.g. 500"
+                  error={errors.sessionPrice?.message}
+                  {...register("sessionPrice", {
+                    required: "Session price is required",
+                    min: { value: 1, message: "Must be at least ₹1" },
+                  })}
                 />
               </div>
             </section>

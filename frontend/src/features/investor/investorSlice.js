@@ -2,26 +2,35 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 import { logoutUser } from "../auth/authSlice";
 
-// Browsing startups and opening one reuse startupSlice (fetchAllStartups /
-// fetchStartupById). This slice only holds what is investor-specific.
+// --- Founder side ---
 
-// ---- Investor side ---------------------------------------------------
-
-// Public: founder + team members of one startup.
-export const fetchStartupTeam = createAsyncThunk(
-  "investor/fetchStartupTeam",
-  async (startupId, { rejectWithValue }) => {
+export const fetchVerifiedInvestors = createAsyncThunk(
+  "investor/fetchVerifiedInvestors",
+  async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get(`/investors/startups/${startupId}/team`);
-      return { startupId, team: res.data.data };
+      const res = await axiosInstance.get("/investors");
+      return res.data.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to load the team");
+      return rejectWithValue(err.response?.data?.message || "Failed to load investors");
     }
   }
 );
 
-export const fetchMyRequests = createAsyncThunk(
-  "investor/fetchMyRequests",
+export const sendInvestmentRequest = createAsyncThunk(
+  "investor/sendInvestmentRequest",
+  async (payload, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/investors/request", payload);
+      await dispatch(fetchMyInvestmentRequests());
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to send request");
+    }
+  }
+);
+
+export const fetchMyInvestmentRequests = createAsyncThunk(
+  "investor/fetchMyInvestmentRequests",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/investors/my-requests");
@@ -32,56 +41,86 @@ export const fetchMyRequests = createAsyncThunk(
   }
 );
 
-// The POST response only carries ids (no startup details), so after it
-// succeeds we reload the investor's requests to get the populated list.
-export const sendConnectionRequest = createAsyncThunk(
-  "investor/sendConnectionRequest",
-  async ({ startupId, message }, { dispatch, rejectWithValue }) => {
+export const withdrawInvestmentRequest = createAsyncThunk(
+  "investor/withdrawInvestmentRequest",
+  async (id, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/investors/connect", { startupId, message });
-      await dispatch(fetchMyRequests());
+      const res = await axiosInstance.put(`/investors/requests/${id}/withdraw`);
       return res.data.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to send request");
+      return rejectWithValue(err.response?.data?.message || "Failed to withdraw request");
     }
   }
 );
 
-// ---- Founder side ----------------------------------------------------
+// --- Investor side ---
 
-export const fetchReceivedRequests = createAsyncThunk(
-  "investor/fetchReceivedRequests",
+export const fetchReceivedInvestmentRequests = createAsyncThunk(
+  "investor/fetchReceivedInvestmentRequests",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/investors/received");
       return res.data.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to load investor requests");
+      return rejectWithValue(err.response?.data?.message || "Failed to load received requests");
     }
   }
 );
 
-// decision: "accept" | "reject"
-export const respondToRequest = createAsyncThunk(
-  "investor/respondToRequest",
+export const respondToInvestmentRequest = createAsyncThunk(
+  "investor/respondToInvestmentRequest",
   async ({ id, decision }, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.put(`/investors/${id}/${decision}`);
+      const res = await axiosInstance.put(`/investors/requests/${id}/${decision}`);
       return res.data.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to respond to the request");
+      return rejectWithValue(err.response?.data?.message || "Failed to respond");
+    }
+  }
+);
+
+// --- Investment payment ---
+
+export const createInvestmentOrder = createAsyncThunk(
+  "investor/createInvestmentOrder",
+  async ({ investorConnectionId, amount, equityPercent }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/payments/investment/create-order", {
+        investorConnectionId,
+        amount,
+        equityPercent,
+      });
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to create order");
+    }
+  }
+);
+
+export const verifyInvestmentPayment = createAsyncThunk(
+  "investor/verifyInvestmentPayment",
+  async (payload, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/payments/investment/verify", payload);
+      await dispatch(fetchReceivedInvestmentRequests());
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Verification failed");
     }
   }
 );
 
 const initialState = {
-  team: null,
-  teamFor: null, // startupId the loaded team belongs to
-  teamStatus: "idle", // idle | loading | succeeded | failed
+  investors: [],
+  investorsStatus: "idle",
+
   myRequests: [],
   myRequestsStatus: "idle",
+
   received: [],
   receivedStatus: "idle",
+
+  actionStatus: "idle",
   error: null,
 };
 
@@ -95,54 +134,82 @@ const investorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchStartupTeam.pending, (state) => {
-        state.teamStatus = "loading";
+      .addCase(fetchVerifiedInvestors.pending, (state) => {
+        state.investorsStatus = "loading";
       })
-      .addCase(fetchStartupTeam.fulfilled, (state, action) => {
-        state.teamStatus = "succeeded";
-        state.team = action.payload.team;
-        state.teamFor = action.payload.startupId;
+      .addCase(fetchVerifiedInvestors.fulfilled, (state, action) => {
+        state.investorsStatus = "succeeded";
+        state.investors = action.payload;
       })
-      .addCase(fetchStartupTeam.rejected, (state, action) => {
-        state.teamStatus = "failed";
+      .addCase(fetchVerifiedInvestors.rejected, (state, action) => {
+        state.investorsStatus = "failed";
         state.error = action.payload;
       })
-      .addCase(fetchMyRequests.pending, (state) => {
+
+      .addCase(fetchMyInvestmentRequests.pending, (state) => {
         state.myRequestsStatus = "loading";
       })
-      .addCase(fetchMyRequests.fulfilled, (state, action) => {
+      .addCase(fetchMyInvestmentRequests.fulfilled, (state, action) => {
         state.myRequestsStatus = "succeeded";
         state.myRequests = action.payload;
       })
-      .addCase(fetchMyRequests.rejected, (state, action) => {
+      .addCase(fetchMyInvestmentRequests.rejected, (state, action) => {
         state.myRequestsStatus = "failed";
         state.error = action.payload;
       })
-      .addCase(fetchReceivedRequests.pending, (state) => {
+
+      .addCase(sendInvestmentRequest.pending, (state) => {
+        state.actionStatus = "loading";
+        state.error = null;
+      })
+      .addCase(sendInvestmentRequest.fulfilled, (state) => {
+        state.actionStatus = "succeeded";
+      })
+      .addCase(sendInvestmentRequest.rejected, (state, action) => {
+        state.actionStatus = "failed";
+        state.error = action.payload;
+      })
+
+      .addCase(withdrawInvestmentRequest.fulfilled, (state, action) => {
+        const idx = state.myRequests.findIndex((r) => r._id === action.payload._id);
+        if (idx !== -1) {
+          state.myRequests[idx] = {
+            ...state.myRequests[idx],
+            status: action.payload.status,
+            respondedAt: action.payload.respondedAt,
+          };
+        }
+      })
+      .addCase(withdrawInvestmentRequest.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      .addCase(fetchReceivedInvestmentRequests.pending, (state) => {
         state.receivedStatus = "loading";
       })
-      .addCase(fetchReceivedRequests.fulfilled, (state, action) => {
+      .addCase(fetchReceivedInvestmentRequests.fulfilled, (state, action) => {
         state.receivedStatus = "succeeded";
         state.received = action.payload;
       })
-      .addCase(fetchReceivedRequests.rejected, (state, action) => {
+      .addCase(fetchReceivedInvestmentRequests.rejected, (state, action) => {
         state.receivedStatus = "failed";
         state.error = action.payload;
       })
-      // The accept/reject response populates a different shape than the
-      // received list (whole startup, investor as a bare id), so update only
-      // the fields that changed instead of swapping the whole item.
-      .addCase(respondToRequest.fulfilled, (state, action) => {
-        const item = state.received.find((r) => r._id === action.payload._id);
-        if (item) {
-          item.status = action.payload.status;
-          item.updatedAt = action.payload.updatedAt;
+
+      .addCase(respondToInvestmentRequest.fulfilled, (state, action) => {
+        const idx = state.received.findIndex((r) => r._id === action.payload._id);
+        if (idx !== -1) {
+          state.received[idx] = {
+            ...state.received[idx],
+            status: action.payload.status,
+            respondedAt: action.payload.respondedAt,
+          };
         }
       })
-      .addCase(respondToRequest.rejected, (state, action) => {
+      .addCase(respondToInvestmentRequest.rejected, (state, action) => {
         state.error = action.payload;
       })
-      // Don't leave one user's data in memory for the next login.
+
       .addCase(logoutUser.fulfilled, () => initialState);
   },
 });

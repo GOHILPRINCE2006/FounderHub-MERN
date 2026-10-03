@@ -2,9 +2,8 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 import { logoutUser } from "../auth/authSlice";
 
-// ---- Founder side ----------------------------------------------------
+// --- Founder side ---
 
-// Public list of verified mentors.
 export const fetchMentors = createAsyncThunk(
   "mentor/fetchMentors",
   async (_, { rejectWithValue }) => {
@@ -17,12 +16,11 @@ export const fetchMentors = createAsyncThunk(
   }
 );
 
-// Every request the founder has sent (with mentor details) plus any feedback.
-export const fetchReceivedFeedback = createAsyncThunk(
-  "mentor/fetchReceivedFeedback",
+export const fetchMyMentorRequests = createAsyncThunk(
+  "mentor/fetchMyMentorRequests",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get("/mentors/received");
+      const res = await axiosInstance.get("/mentors/my-requests");
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to load your requests");
@@ -30,14 +28,12 @@ export const fetchReceivedFeedback = createAsyncThunk(
   }
 );
 
-// The POST response only carries the mentor's id, so after it succeeds we
-// reload the received list to get the new request with mentor details.
-export const requestFeedback = createAsyncThunk(
-  "mentor/requestFeedback",
-  async (mentorId, { dispatch, rejectWithValue }) => {
+export const requestMentor = createAsyncThunk(
+  "mentor/requestMentor",
+  async ({ mentorId, message }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/mentors/request", { mentorId });
-      await dispatch(fetchReceivedFeedback());
+      const res = await axiosInstance.post("/mentors/request", { mentorId, message });
+      await dispatch(fetchMyMentorRequests());
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to send request");
@@ -45,7 +41,7 @@ export const requestFeedback = createAsyncThunk(
   }
 );
 
-// ---- Mentor side -----------------------------------------------------
+// --- Mentor side ---
 
 export const fetchMentorQueue = createAsyncThunk(
   "mentor/fetchMentorQueue",
@@ -59,25 +55,68 @@ export const fetchMentorQueue = createAsyncThunk(
   }
 );
 
-export const submitFeedback = createAsyncThunk(
-  "mentor/submitFeedback",
-  async ({ id, feedbackText }, { rejectWithValue }) => {
+export const acceptMentorRequest = createAsyncThunk(
+  "mentor/acceptMentorRequest",
+  async (id, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.put(`/mentors/feedback/${id}`, { feedbackText });
+      const res = await axiosInstance.put(`/mentors/requests/${id}/accept`);
       return res.data.data;
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to submit feedback");
+      return rejectWithValue(err.response?.data?.message || "Failed to accept");
+    }
+  }
+);
+
+export const declineMentorRequest = createAsyncThunk(
+  "mentor/declineMentorRequest",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(`/mentors/requests/${id}/decline`);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to decline");
+    }
+  }
+);
+
+// --- Payment ---
+
+export const createPaymentOrder = createAsyncThunk(
+  "mentor/createPaymentOrder",
+  async (mentorRequestId, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/payments/mentor/create-order", { mentorRequestId });
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to create order");
+    }
+  }
+);
+
+export const verifyPayment = createAsyncThunk(
+  "mentor/verifyPayment",
+  async (payload, { dispatch, rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/payments/mentor/verify", payload);
+      await dispatch(fetchMyMentorRequests());
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Payment verification failed");
     }
   }
 );
 
 const initialState = {
   mentors: [],
-  mentorsStatus: "idle", // idle | loading | succeeded | failed
-  received: [],
-  receivedStatus: "idle",
+  mentorsStatus: "idle",
+
+  myRequests: [],
+  myRequestsStatus: "idle",
+
   queue: [],
   queueStatus: "idle",
+
+  actionStatus: "idle",
   error: null,
 };
 
@@ -102,23 +141,31 @@ const mentorSlice = createSlice({
         state.mentorsStatus = "failed";
         state.error = action.payload;
       })
-      .addCase(fetchReceivedFeedback.pending, (state) => {
-        state.receivedStatus = "loading";
+
+      .addCase(fetchMyMentorRequests.pending, (state) => {
+        state.myRequestsStatus = "loading";
       })
-      .addCase(fetchReceivedFeedback.fulfilled, (state, action) => {
-        state.receivedStatus = "succeeded";
-        state.received = action.payload;
+      .addCase(fetchMyMentorRequests.fulfilled, (state, action) => {
+        state.myRequestsStatus = "succeeded";
+        state.myRequests = action.payload;
       })
-      .addCase(fetchReceivedFeedback.rejected, (state, action) => {
-        state.receivedStatus = "failed";
+      .addCase(fetchMyMentorRequests.rejected, (state, action) => {
+        state.myRequestsStatus = "failed";
         state.error = action.payload;
       })
-      .addCase(requestFeedback.pending, (state) => {
+
+      .addCase(requestMentor.pending, (state) => {
+        state.actionStatus = "loading";
         state.error = null;
       })
-      .addCase(requestFeedback.rejected, (state, action) => {
+      .addCase(requestMentor.fulfilled, (state) => {
+        state.actionStatus = "succeeded";
+      })
+      .addCase(requestMentor.rejected, (state, action) => {
+        state.actionStatus = "failed";
         state.error = action.payload;
       })
+
       .addCase(fetchMentorQueue.pending, (state) => {
         state.queueStatus = "loading";
       })
@@ -130,17 +177,35 @@ const mentorSlice = createSlice({
         state.queueStatus = "failed";
         state.error = action.payload;
       })
-      // The PUT response has a different populate shape than the queue items
-      // (whole startup, no requestedBy), so update only the fields that changed.
-      .addCase(submitFeedback.fulfilled, (state, action) => {
-        const item = state.queue.find((r) => r._id === action.payload._id);
-        if (item) {
-          item.feedbackText = action.payload.feedbackText;
-          item.status = action.payload.status;
-          item.updatedAt = action.payload.updatedAt;
+
+      .addCase(acceptMentorRequest.fulfilled, (state, action) => {
+        const idx = state.queue.findIndex((r) => r._id === action.payload._id);
+        if (idx !== -1) {
+          state.queue[idx] = {
+            ...state.queue[idx],
+            status: action.payload.status,
+            respondedAt: action.payload.respondedAt,
+          };
         }
       })
-      // Don't leave one user's data in memory for the next login.
+      .addCase(acceptMentorRequest.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
+      .addCase(declineMentorRequest.fulfilled, (state, action) => {
+        const idx = state.queue.findIndex((r) => r._id === action.payload._id);
+        if (idx !== -1) {
+          state.queue[idx] = {
+            ...state.queue[idx],
+            status: action.payload.status,
+            respondedAt: action.payload.respondedAt,
+          };
+        }
+      })
+      .addCase(declineMentorRequest.rejected, (state, action) => {
+        state.error = action.payload;
+      })
+
       .addCase(logoutUser.fulfilled, () => initialState);
   },
 });

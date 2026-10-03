@@ -21,7 +21,6 @@ const FOUNDER_NAV_ITEMS = [
   { label: "Team Chat",   to: "/founder/chat",        icon: <MessageSquare className={ICON} /> },
   { label: "Mentors",     to: "/founder/mentors",     icon: <GraduationCap className={ICON} /> },
   { label: "Investors",   to: "/founder/investors",   icon: <TrendingUp className={ICON} /> },
-  { label: "Funding",     to: "/founder/funding",     icon: <Banknote className={ICON} /> },
   { label: "Progress",    to: "/founder/progress",    icon: <BarChart3 className={ICON} /> },
 ];
 

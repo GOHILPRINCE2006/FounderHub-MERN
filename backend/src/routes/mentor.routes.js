@@ -3,19 +3,21 @@ const router = express.Router();
 
 const {
   getVerifiedMentors,
-  requestMentorFeedback,
+  requestMentor,
   getMentorQueue,
-  submitFeedback,
-  getFeedbackForMyStartup,
+  acceptMentorRequest,
+  declineMentorRequest,
+  getMyMentorRequests,
 } = require("../controllers/mentor.controller");
 
 const protect = require("../middlewares/auth.middleware");
 const authorizeRoles = require("../middlewares/role.middleware");
 
 router.get("/", getVerifiedMentors);
-router.post("/request", protect, authorizeRoles("founder"), requestMentorFeedback);
+router.post("/request", protect, authorizeRoles("founder"), requestMentor);
+router.get("/my-requests", protect, authorizeRoles("founder"), getMyMentorRequests);
 router.get("/queue", protect, authorizeRoles("mentor"), getMentorQueue);
-router.put("/feedback/:id", protect, authorizeRoles("mentor"), submitFeedback);
-router.get("/received", protect, authorizeRoles("founder"), getFeedbackForMyStartup);
+router.put("/requests/:id/accept", protect, authorizeRoles("mentor"), acceptMentorRequest);
+router.put("/requests/:id/decline", protect, authorizeRoles("mentor"), declineMentorRequest);
 
 module.exports = router;

@@ -2,22 +2,24 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getStartupTeam,
-  sendConnectionRequest,
-  getMyConnectionRequests,
-  getReceivedConnectionRequests,
-  acceptConnectionRequest,
-  rejectConnectionRequest,
+  getVerifiedInvestors,
+  sendInvestmentRequest,
+  getMyInvestmentRequests,
+  getReceivedInvestmentRequests,
+  acceptInvestmentRequest,
+  declineInvestmentRequest,
+  withdrawInvestmentRequest,
 } = require("../controllers/investor.controller");
 
 const protect = require("../middlewares/auth.middleware");
 const authorizeRoles = require("../middlewares/role.middleware");
 
-router.get("/startups/:id/team", getStartupTeam);
-router.post("/connect", protect, authorizeRoles("investor"), sendConnectionRequest);
-router.get("/my-requests", protect, authorizeRoles("investor"), getMyConnectionRequests);
-router.get("/received", protect, authorizeRoles("founder"), getReceivedConnectionRequests);
-router.put("/:id/accept", protect, authorizeRoles("founder"), acceptConnectionRequest);
-router.put("/:id/reject", protect, authorizeRoles("founder"), rejectConnectionRequest);
+router.get("/", getVerifiedInvestors);
+router.post("/request", protect, authorizeRoles("founder"), sendInvestmentRequest);
+router.get("/my-requests", protect, authorizeRoles("founder"), getMyInvestmentRequests);
+router.get("/received", protect, authorizeRoles("investor"), getReceivedInvestmentRequests);
+router.put("/requests/:id/accept", protect, authorizeRoles("investor"), acceptInvestmentRequest);
+router.put("/requests/:id/decline", protect, authorizeRoles("investor"), declineInvestmentRequest);
+router.put("/requests/:id/withdraw", protect, authorizeRoles("founder"), withdrawInvestmentRequest);
 
 module.exports = router;

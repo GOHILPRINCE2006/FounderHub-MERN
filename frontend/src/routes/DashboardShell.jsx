@@ -17,7 +17,6 @@ const navByRole = {
     { label: "Team Chat",   to: "/founder/chat",        icon: <MessageSquare className={ICON} /> },
     { label: "Mentors",     to: "/founder/mentors",     icon: <GraduationCap className={ICON} /> },
     { label: "Investors",   to: "/founder/investors",   icon: <TrendingUp className={ICON} /> },
-    { label: "Funding",     to: "/founder/funding",     icon: <Banknote className={ICON} /> },
     { label: "Progress",    to: "/founder/progress",    icon: <BarChart3 className={ICON} /> },
   ],
   developer: [
@@ -33,9 +32,7 @@ const navByRole = {
   ],
   investor: [
     { label: "Overview",          to: "/dashboard",         icon: <LayoutDashboard className={ICON} /> },
-    { label: "Discover Startups", to: "/investor/startups", icon: <Compass className={ICON} /> },
     { label: "Funding",           to: "/investor/funding",  icon: <Banknote className={ICON} /> },
-    { label: "My Requests",       to: "/investor/requests", icon: <Send className={ICON} /> },
   ],
 };
 

@@ -13,13 +13,15 @@ const getProfile = asyncHandler(async (req, res) => {
 
 // @route PUT /api/v1/users/profile
 const updateProfile = asyncHandler(async (req, res) => {
-  const allowedFields = [
+    const allowedFields = [
     // common
     "name", "phone", "location", "github", "linkedin", "website",
     "skills", "experience", "about",
     // role-specific
     "availability", "expertise", "yearsOfExperience", "currentRole",
     "company", "investmentFocus", "ticketSize",
+    // mentor-specific
+    "sessionPrice",
   ];
 
   const updates = {};

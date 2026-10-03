@@ -6,10 +6,14 @@ const { generateToken, sendTokenCookie } = require("../utils/generateToken");
 
 // @route POST /api/v1/auth/register
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, phone } = req.body;
 
-  if (!name || !email || !password || !role) {
+  if (!name || !email || !password || !role || !phone) {
     throw new ApiError(400, "All fields are required");
+  }
+
+  if (!/^\d{10}$/.test(String(phone).trim())) {
+    throw new ApiError(400, "Phone number must be exactly 10 digits");
   }
 
   const allowedRoles = ["founder", "developer", "mentor", "investor"];
@@ -22,7 +26,34 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "Email already registered");
   }
 
-  const user = await User.create({ name, email, password, role });
+  const existingPhone = await User.findOne({ phone: String(phone).trim() });
+  if (existingPhone) {
+    throw new ApiError(409, "Phone number already registered");
+  }
+
+  let user;
+  try {
+    user = await User.create({
+      name,
+      email,
+      password,
+      role,
+      phone: String(phone).trim(),
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      // Mongo duplicate key — figure out which field
+      const field = Object.keys(error.keyPattern || {})[0];
+      if (field === "email") {
+        throw new ApiError(409, "Email already registered");
+      }
+      if (field === "phone") {
+        throw new ApiError(409, "Phone number already registered");
+      }
+      throw new ApiError(409, "Duplicate value");
+    }
+    throw error;
+  }
 
   const token = generateToken(user._id);
   sendTokenCookie(res, token);
@@ -34,6 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
     role: user.role,
     isVerified: user.isVerified,
     avatar: user.avatar,
+    phone: user.phone,
   };
 
   return res
@@ -66,13 +98,14 @@ const loginUser = asyncHandler(async (req, res) => {
   const token = generateToken(user._id);
   sendTokenCookie(res, token);
 
-    const userResponse = {
+  const userResponse = {
     _id: user._id,
     name: user.name,
     email: user.email,
     role: user.role,
     isVerified: user.isVerified,
     avatar: user.avatar,
+    phone: user.phone,
   };
 
   return res

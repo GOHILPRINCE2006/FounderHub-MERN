@@ -14,6 +14,7 @@ const notificationRoutes = require("./notification.routes");
 const progressRoutes = require("./progress.routes");
 const adminRoutes = require("./admin.routes");
 const fundingRoutes = require("./funding.routes");
+const paymentRoutes = require("./payment.routes");
 
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -28,4 +29,6 @@ router.use("/notifications", notificationRoutes);
 router.use("/progress", progressRoutes);
 router.use("/admin", adminRoutes);
 router.use("/funding", fundingRoutes);
+router.use("/payments", paymentRoutes);
+
 module.exports = router;

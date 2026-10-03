@@ -20,10 +20,6 @@ import MyTasks from "../pages/developer/MyTasks";
 import TeamChat from "../pages/chat/TeamChat";
 import MentorFeedback from "../pages/founder/mentorFeedback";
 import MentorQueue from "../pages/mentor/MentorQueue";
-import InvestorRequests from "../pages/founder/InvestorRequests";
-import DiscoverStartups from "../pages/investor/DiscoverStartups";
-import InvestorStartupDetail from "../pages/investor/InvestorStartupDetail";
-import MyRequests from "../pages/investor/MyRequests";
 import Profile from "../pages/profile/Profile";
 import StartupProgress from "../pages/founder/StartupProgress";
 import AuthLayout from "../components/layout/AuthLayout";
@@ -37,8 +33,9 @@ import AdminShell from "./admin/AdminShell";
 import AdminUsers from "../pages/admin/AdminUsers";
 import AdminStartups from "../pages/admin/AdminStartups";
 import AdminVerifications from "../pages/admin/AdminVerifications";
-import FounderFunding from "../pages/founder/FundingRequests";
-import InvestorFunding from "../pages/investor/FundingRequests";
+import BrowseInvestors from "../pages/founder/BrowseInvestors";
+import InvestorRequests from "../pages/investor/Requests";
+import InvestorFundingRequests from "../pages/investor/Requests";
 
 export default function AppRoutes() {
   const dispatch = useDispatch();
@@ -82,8 +79,7 @@ export default function AppRoutes() {
             <Route path="/founder/progress" element={<StartupProgress />} />
             <Route path="/founder/chat" element={<TeamChat />} />
             <Route path="/founder/mentors" element={<MentorFeedback />} />
-            <Route path="/founder/investors" element={<InvestorRequests />} />
-            <Route path="/founder/funding" element={<FounderFunding />} />
+            <Route path="/founder/investors" element={<BrowseInvestors />} />
           </Route>
         </Route>
 
@@ -95,13 +91,7 @@ export default function AppRoutes() {
 
         <Route element={<ProtectedRoute allowedRoles={["investor"]} />}>
           <Route element={<InvestorShell />}>
-            <Route path="/investor/startups" element={<DiscoverStartups />} />
-            <Route
-              path="/investor/startups/:id"
-              element={<InvestorStartupDetail />}
-            />
-            <Route path="/investor/requests" element={<MyRequests />} />
-            <Route path="/investor/funding" element={<InvestorFunding />} />
+          <Route path="/investor/requests" element={<InvestorFundingRequests />} />
           </Route>
         </Route>
       </Route>
