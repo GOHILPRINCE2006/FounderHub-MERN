@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
+import { useParams, useNavigate } from "react-router-dom";
 import {
-  fetchMyStartup,
-  createStartup,
   updateStartup,
+  createStartup,
   clearStartupError,
 } from "../../features/startup/startupSlice";
 import Card from "../../components/common/Card";
@@ -18,14 +18,17 @@ import { Rocket, ImagePlus, Lock, Globe } from "lucide-react";
 
 const STAGES = ["Idea", "MVP", "Funded", "Scaling"];
 const FUNDING = ["Bootstrapped", "Pre-seed", "Seed", "Raised"];
-const LOOKING_FOR = ["Co-founder", "Early hire", "Advisor", "Intern"];
 
-export default function CreateStartup() {
+export default function ManageStartup() {
+  const { startupId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { myStartup, fetchStatus, actionStatus, error } = useSelector(
-    (state) => state.startup
-  );
-  const isEditMode = Boolean(myStartup);
+  
+  const { myStartups, actionStatus, error } = useSelector((state) => state.startup);
+  
+  // If there is no ID in the URL, we are creating a new startup.
+  const isEditMode = Boolean(startupId);
+  const myStartup = isEditMode ? myStartups.find((s) => s._id === startupId) : null;
 
   const [requiredSkills, setRequiredSkills] = useState([]);
   const [requiredRoles, setRequiredRoles] = useState([]);
@@ -42,12 +45,9 @@ export default function CreateStartup() {
     formState: { errors },
   } = useForm();
 
+  // Populate the form when the startup is found (only in Edit mode)
   useEffect(() => {
-    dispatch(fetchMyStartup());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (myStartup) {
+    if (isEditMode && myStartup) {
       reset({
         name: myStartup.name || "",
         tagline: myStartup.tagline || "",
@@ -68,7 +68,7 @@ export default function CreateStartup() {
       setTechnologies(myStartup.technologies || []);
       setLogoPreview(myStartup.logo || null);
     }
-  }, [myStartup, reset]);
+  }, [isEditMode, myStartup, reset]);
 
   const handleLogoChange = (e) => {
     const file = e.target.files[0];
@@ -92,37 +92,41 @@ export default function CreateStartup() {
     formData.append("technologies", JSON.stringify(technologies));
     if (logoFile) formData.append("logo", logoFile);
 
-    const action = isEditMode
-      ? updateStartup({ id: myStartup._id, formData })
-      : createStartup(formData);
-
-    const result = await dispatch(action);
-
-    if (
-      createStartup.fulfilled.match(result) ||
-      updateStartup.fulfilled.match(result)
-    ) {
-      setSavedMessage(true);
-      setTimeout(() => setSavedMessage(false), 4000);
+    if (isEditMode) {
+      const result = await dispatch(updateStartup({ id: startupId, formData }));
+      if (updateStartup.fulfilled.match(result)) {
+        setSavedMessage(true);
+        setTimeout(() => setSavedMessage(false), 4000);
+      }
+    } else {
+      const result = await dispatch(createStartup(formData));
+      if (createStartup.fulfilled.match(result)) {
+        navigate(`/founder/${result.payload._id}/dashboard`);
+      }
     }
   };
 
-  if (fetchStatus === "loading") {
-    return <Loader label="Loading your startup" full />;
+  // Only show loader if we are in edit mode and still waiting for data
+  if (isEditMode && !myStartup) {
+    return <Loader label="Loading startup details" full />;
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <h1 className="font-display text-xl font-semibold text-ink">
-        {isEditMode ? "My Startup" : "Create Your Startup"}
-      </h1>
-      <p className="mt-1 mb-6 text-sm text-muted">
-        {isEditMode
-          ? "Update your startup's details."
-          : "Tell us what you're building. You can edit this later."}
-      </p>
+    <div className="mx-auto max-w-2xl py-8">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-xl font-semibold text-ink">
+            {isEditMode ? "Startup Settings" : "Launch a New Startup"}
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {isEditMode 
+              ? "Update your startup's public and private details."
+              : "Fill in the details below to launch your new startup."}
+          </p>
+        </div>
+      </div>
 
-            {error && (
+      {error && (
         <div className="mb-4">
           <ErrorMessage message={error} />
         </div>
@@ -130,7 +134,7 @@ export default function CreateStartup() {
 
       {savedMessage && (
         <div className="mb-4 rounded-lg bg-success-bg px-4 py-2 text-sm text-success">
-          {isEditMode ? "Startup updated successfully." : "Startup created successfully."}
+          Startup updated successfully.
         </div>
       )}
 
@@ -142,9 +146,7 @@ export default function CreateStartup() {
             <h2 className="font-display text-sm font-semibold text-ink">
               Public details
             </h2>
-            <span className="text-xs text-muted">
-              — everyone can see these
-            </span>
+            <span className="text-xs text-muted">— everyone can see these</span>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -208,7 +210,6 @@ export default function CreateStartup() {
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
                     ${errors.stage ? "border-danger" : "border-border"}`}
                   {...register("stage", { required: "Please select a stage" })}
-                  defaultValue=""
                 >
                   <option value="" disabled>Select a stage</option>
                   {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -248,7 +249,7 @@ export default function CreateStartup() {
               label="Looking For *"
               value={lookingFor}
               onChange={setLookingFor}
-              placeholder={`e.g. ${LOOKING_FOR.join(", ")}`}
+              placeholder="e.g. Co-founder, Early hire"
             />
           </div>
         </Card>
@@ -308,7 +309,6 @@ export default function CreateStartup() {
                 id="fundingStatus"
                 className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 {...register("fundingStatus")}
-                defaultValue=""
               >
                 <option value="">Not specified</option>
                 {FUNDING.map((f) => <option key={f} value={f}>{f}</option>)}

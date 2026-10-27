@@ -42,35 +42,24 @@ const registerUser = asyncHandler(async (req, res) => {
     });
   } catch (error) {
     if (error.code === 11000) {
-      // Mongo duplicate key — figure out which field
       const field = Object.keys(error.keyPattern || {})[0];
-      if (field === "email") {
-        throw new ApiError(409, "Email already registered");
-      }
-      if (field === "phone") {
-        throw new ApiError(409, "Phone number already registered");
-      }
+      if (field === "email") throw new ApiError(409, "Email already registered");
+      if (field === "phone") throw new ApiError(409, "Phone number already registered");
       throw new ApiError(409, "Duplicate value");
     }
     throw error;
   }
 
+  // ✅ RESTORED: Generate token and set cookie
   const token = generateToken(user._id);
   sendTokenCookie(res, token);
 
-  const userResponse = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    isVerified: user.isVerified,
-    avatar: user.avatar,
-    phone: user.phone,
-  };
+  // Re-fetch so password is excluded (select:false).
+  const safeUser = await User.findById(user._id);
 
   return res
     .status(201)
-    .json(new ApiResponse(201, userResponse, "User registered successfully"));
+    .json(new ApiResponse(201, safeUser, "User registered successfully"));
 });
 
 // @route POST /api/v1/auth/login
@@ -95,22 +84,16 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid email or password");
   }
 
+  // ✅ RESTORED: Generate token and set cookie
   const token = generateToken(user._id);
   sendTokenCookie(res, token);
 
-  const userResponse = {
-    _id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role,
-    isVerified: user.isVerified,
-    avatar: user.avatar,
-    phone: user.phone,
-  };
+  // Strip password before returning.
+  user.password = undefined;
 
   return res
     .status(200)
-    .json(new ApiResponse(200, userResponse, "Login successful"));
+    .json(new ApiResponse(200, user, "Login successful"));
 });
 
 // @route POST /api/v1/auth/logout

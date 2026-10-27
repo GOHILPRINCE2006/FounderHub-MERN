@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchMyStartup } from "../../features/startup/startupSlice";
+import { useParams } from "react-router-dom";
 import { fetchStartupProgress, clearProgress } from "../../features/progress/progressSlice";
 import Card from "../../components/common/Card";
 import Loader from "../../components/common/Loader";
@@ -60,38 +60,32 @@ function ProgressBar({ value }) {
 }
 
 export default function StartupProgress() {
+  const { startupId } = useParams();
   const dispatch = useDispatch();
-  const { myStartup, fetchStatus: startupFetchStatus } = useSelector((state) => state.startup);
+  
+  const { myStartups } = useSelector((state) => state.startup);
+  const activeStartup = myStartups.find(s => s._id === startupId);
+  
   const { data, fetchStatus, error } = useSelector((state) => state.progress);
 
   useEffect(() => {
     dispatch(clearProgress());
-    if (!myStartup) dispatch(fetchMyStartup());
-  }, [dispatch, myStartup]);
+  }, [dispatch]);
 
   useEffect(() => {
-    if (myStartup?._id) dispatch(fetchStartupProgress(myStartup._id));
-  }, [dispatch, myStartup]);
+    if (startupId) {
+      dispatch(fetchStartupProgress(startupId));
+    }
+  }, [dispatch, startupId]);
 
-  if (startupFetchStatus === "loading" || (!myStartup && fetchStatus !== "failed")) {
+  // If we don't have the startup data in redux yet, wait for the shell to load it
+  if (!activeStartup) {
+    return <Loader label="Loading startup details..." full />;
+  }
+
+  if (fetchStatus === "loading" && !data) {
     return <Loader label="Loading progress" full />;
   }
-
-  if (!myStartup) {
-    return (
-      <div className="mx-auto max-w-3xl">
-        <h1 className="font-display text-xl font-semibold text-ink">Progress</h1>
-        <p className="mt-1 mb-6 text-sm text-muted">Track your startup's momentum.</p>
-        <Card>
-          <p className="py-4 text-center text-sm text-muted">
-            Create your startup first to see progress.
-          </p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (fetchStatus === "loading" && !data) return <Loader label="Loading progress" full />;
 
   if (error && !data) {
     return (
@@ -101,14 +95,21 @@ export default function StartupProgress() {
     );
   }
 
-  if (!data) return null;
+  // If the backend returns empty data (a brand new startup), show zeros instead of crashing
+  const safeData = data || {
+    taskStats: { total: 0, todo: 0, inProgress: 0, done: 0, completionPercentage: 0 },
+    teamContribution: [],
+    recruitmentStats: { totalPosts: 0, openPosts: 0, closedPosts: 0, totalApplications: 0, pending: 0, accepted: 0, rejected: 0 },
+    funding: { moneyIn: 0, moneyOut: 0, net: 0, investments: [] },
+    activityTimeline: [],
+  };
 
-  const { taskStats, teamContribution, recruitmentStats, activityTimeline, funding } = data;
+  const { taskStats, teamContribution, recruitmentStats, activityTimeline, funding } = safeData;
 
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="font-display text-xl font-semibold text-ink">Progress</h1>
-      <p className="mt-1 mb-6 text-sm text-muted">How {myStartup.name} is moving.</p>
+      <p className="mt-1 mb-6 text-sm text-muted">How {activeStartup.name} is moving.</p>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

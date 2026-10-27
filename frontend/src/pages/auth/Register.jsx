@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser, clearAuthError } from "../../features/auth/authSlice";
+import { registerUser, clearAuthError, fetchCurrentUser } from "../../features/auth/authSlice";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import ErrorMessage from "../../components/common/ErrorMessage";
@@ -34,8 +34,15 @@ export default function Register() {
   const onSubmit = async (data) => {
     dispatch(clearAuthError());
     const result = await dispatch(registerUser(data));
+    
     if (registerUser.fulfilled.match(result)) {
-      navigate("/dashboard");
+      await dispatch(fetchCurrentUser());
+      
+      if (result.payload.role === "founder") {
+        navigate("/founder/create"); // New founders need to create a startup first
+      } else {
+        navigate("/dashboard");
+      }
     }
   };
 
@@ -127,7 +134,7 @@ export default function Register() {
             <p>
               {roleField === "mentor" ? "Mentor" : "Investor"} accounts need
               admin verification before you can access your dashboard. You can
-              sign up now — we&apos;ll notify you once you&apos;re verified.
+              sign up now — we&apos;ll notify you once you&apos;re approved.
             </p>
           </div>
         )}

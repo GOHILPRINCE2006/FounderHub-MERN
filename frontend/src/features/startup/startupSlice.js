@@ -1,17 +1,14 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
 
-export const fetchMyStartup = createAsyncThunk(
-  "startup/fetchMyStartup",
+export const fetchMyStartups = createAsyncThunk(
+  "startup/fetchMyStartups",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get("/startups/my-startup");
+      const res = await axiosInstance.get("/startups/my-startups");
       return res.data.data;
     } catch (err) {
-      if (err.response?.status === 404) {
-        return null;
-      }
-      return rejectWithValue(err.response?.data?.message || "Failed to load startup");
+      return rejectWithValue(err.response?.data?.message || "Failed to load startups");
     }
   }
 );
@@ -44,8 +41,6 @@ export const updateStartup = createAsyncThunk(
   }
 );
 
-// Browse — public list, supports the same query params as the backend
-// (keyword, industry, stage, skills, role).
 export const fetchAllStartups = createAsyncThunk(
   "startup/fetchAllStartups",
   async (filters = {}, { rejectWithValue }) => {
@@ -73,15 +68,14 @@ export const fetchStartupById = createAsyncThunk(
 const startupSlice = createSlice({
   name: "startup",
   initialState: {
-    myStartup: null,
+    myStartups: [], // Array of startups owned by the founder
     fetchStatus: "idle",
     actionStatus: "idle",
     error: null,
-    // Browse/detail state — separate from myStartup so a founder browsing
-    // other startups doesn't clobber their own startup's data.
+    
     allStartups: [],
     browseStatus: "idle",
-    activeStartup: null,
+    activeStartup: null, // Used for public detail view
     detailStatus: "idle",
   },
   reducers: {
@@ -91,41 +85,49 @@ const startupSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMyStartup.pending, (state) => {
+      // Fetch All My Startups
+      .addCase(fetchMyStartups.pending, (state) => {
         state.fetchStatus = "loading";
       })
-      .addCase(fetchMyStartup.fulfilled, (state, action) => {
+      .addCase(fetchMyStartups.fulfilled, (state, action) => {
         state.fetchStatus = "succeeded";
-        state.myStartup = action.payload;
+        state.myStartups = action.payload;
       })
-      .addCase(fetchMyStartup.rejected, (state, action) => {
+      .addCase(fetchMyStartups.rejected, (state, action) => {
         state.fetchStatus = "failed";
         state.error = action.payload;
       })
+
+      // Create Startup
       .addCase(createStartup.pending, (state) => {
         state.actionStatus = "loading";
         state.error = null;
       })
       .addCase(createStartup.fulfilled, (state, action) => {
         state.actionStatus = "succeeded";
-        state.myStartup = action.payload;
+        state.myStartups.unshift(action.payload); // Add to the array
       })
       .addCase(createStartup.rejected, (state, action) => {
         state.actionStatus = "failed";
         state.error = action.payload;
       })
+
+      // Update Startup
       .addCase(updateStartup.pending, (state) => {
         state.actionStatus = "loading";
         state.error = null;
       })
       .addCase(updateStartup.fulfilled, (state, action) => {
         state.actionStatus = "succeeded";
-        state.myStartup = action.payload;
+        const idx = state.myStartups.findIndex((s) => s._id === action.payload._id);
+        if (idx !== -1) state.myStartups[idx] = action.payload;
       })
       .addCase(updateStartup.rejected, (state, action) => {
         state.actionStatus = "failed";
         state.error = action.payload;
       })
+
+      // Browse All Public Startups
       .addCase(fetchAllStartups.pending, (state) => {
         state.browseStatus = "loading";
       })
@@ -137,6 +139,8 @@ const startupSlice = createSlice({
         state.browseStatus = "failed";
         state.error = action.payload;
       })
+
+      // Fetch Public Detail by ID
       .addCase(fetchStartupById.pending, (state) => {
         state.detailStatus = "loading";
       })

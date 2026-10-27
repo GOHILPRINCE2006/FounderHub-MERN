@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -8,7 +9,6 @@ import {
   deleteTask,
   clearTaskError,
 } from "../../features/task/taskSlice";
-import { fetchMyStartup } from "../../features/startup/startupSlice";
 import Card from "../../components/common/Card";
 import Input from "../../components/common/Input";
 import Textarea from "../../components/common/Textarea";
@@ -26,8 +26,13 @@ const COLUMN_STYLE = {
 };
 
 export default function KanbanBoard() {
+  const { startupId } = useParams(); // 1. Get startupId from URL
   const dispatch = useDispatch();
-  const { myStartup } = useSelector((state) => state.startup);
+  
+  // 2. Get the array of startups from Redux to find team members
+  const { myStartups } = useSelector((state) => state.startup);
+  const activeStartup = myStartups.find((s) => s._id === startupId);
+
   const { startupTasks, fetchStatus, actionStatus, error } = useSelector(
     (state) => state.task
   );
@@ -41,13 +46,12 @@ export default function KanbanBoard() {
     formState: { errors },
   } = useForm();
 
+  // 3. Fetch tasks using the startupId from the URL
   useEffect(() => {
-    if (!myStartup) dispatch(fetchMyStartup());
-  }, [dispatch, myStartup]);
-
-  useEffect(() => {
-    if (myStartup?._id) dispatch(fetchTasksForStartup(myStartup._id));
-  }, [dispatch, myStartup]);
+    if (startupId) {
+      dispatch(fetchTasksForStartup(startupId));
+    }
+  }, [dispatch, startupId]);
 
   const onSubmit = async (data) => {
     dispatch(clearTaskError());
@@ -56,7 +60,7 @@ export default function KanbanBoard() {
         title: data.title,
         description: data.description,
         assignedMember: data.assignedMember || undefined,
-        startupId: myStartup._id,
+        startupId, // 4. Pass startupId to the backend
       })
     );
     if (createTask.fulfilled.match(result)) {
@@ -69,7 +73,8 @@ export default function KanbanBoard() {
     if (window.confirm("Delete this task?")) dispatch(deleteTask(id));
   };
 
-  if (!myStartup) return <Loader label="Loading startup" full />;
+  // Wait for the startup to load from Redux before rendering
+  if (!activeStartup) return <Loader label="Loading workspace" full />;
 
   const columns = STATUSES.map((status) => ({
     status,
@@ -81,7 +86,7 @@ export default function KanbanBoard() {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-xl font-semibold text-ink">Task Board</h1>
-          <p className="mt-1 text-sm text-muted">{myStartup.name}</p>
+          <p className="mt-1 text-sm text-muted">{activeStartup.name}</p>
         </div>
         <Button
           variant={showForm ? "outline" : "primary"}
@@ -131,7 +136,8 @@ export default function KanbanBoard() {
                 defaultValue=""
               >
                 <option value="">Unassigned</option>
-                {myStartup.teamMembers?.map((member) => (
+                {/* Use team members from the ACTIVE startup */}
+                {activeStartup.teamMembers?.map((member) => (
                   <option key={member._id || member} value={member._id || member}>
                     {member.name || member}
                   </option>

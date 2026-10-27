@@ -22,7 +22,7 @@ const recruitmentPostSchema = new mongoose.Schema(
     },
     isOpen: {
       type: Boolean,
-      default: true, // founder can close a post once role is filled
+      default: true, 
     },
   },
   { timestamps: true }

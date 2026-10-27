@@ -17,11 +17,12 @@ const investorConnectionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    message: {
-      type: String,
-      default: "",
-      trim: true,
-    },
+    // The founder's pitch/message to the investor
+    pitch: {
+    type: String,
+    default: "",
+    trim: true,
+  },
     // What the founder proposed when sending the request.
     proposedAmount: {
       type: Number,
@@ -38,16 +39,22 @@ const investorConnectionSchema = new mongoose.Schema(
     finalAmount: { type: Number, default: null },
     finalEquity: { type: Number, default: null },
 
+    // Request Status
     status: {
       type: String,
-      // Requested → Accepted → Invested   (happy path)
-      // Requested → Declined               (investor said no)
-      // Requested / Accepted → Withdrawn   (founder closed it)
-      enum: ["Requested", "Accepted", "Declined", "Invested", "Withdrawn"],
-      default: "Requested",
+      enum: ["Pending", "Accepted", "Declined", "Invested", "Withdrawn"],
+      default: "Pending",
     },
+    
+    // Payment / Deal Status
+    paymentStatus: {
+      type: String,
+      enum: ["Unpaid", "Paid"],
+      default: "Unpaid",
+    },
+
     respondedAt: { type: Date, default: null },
-    paidAt:      { type: Date, default: null },
+    paidAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

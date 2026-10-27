@@ -5,13 +5,14 @@ import {
   acceptMentorRequest,
   declineMentorRequest,
   clearMentorError,
+  completeMentorSession,
 } from "../../features/mentor/mentorSlice";
 import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
 import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Target, AlertCircle } from "lucide-react";
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString([], {
@@ -20,23 +21,25 @@ const formatDate = (iso) =>
     year: "numeric",
   });
 
+const formatINR = (n) => "₹" + Number(n || 0).toLocaleString("en-IN");
+
 function FounderContact({ founder }) {
   if (!founder?.email && !founder?.phone) return null;
   return (
-    <div className="mt-3 rounded-lg border border-success/40 bg-success-bg p-3 text-sm">
-      <p className="font-medium text-success">Paid — reach out to arrange the meeting</p>
-      <div className="mt-1.5 flex flex-col gap-1 text-xs text-ink">
+    <div className="mt-4 rounded-xl border border-success/30 bg-success-bg p-4 text-sm">
+      <p className="font-medium text-success mb-2">Payment Received — Contact the Founder</p>
+      <div className="flex flex-col gap-1.5 text-sm text-ink">
         {founder.email && (
-          <span className="inline-flex items-center gap-1.5">
-            <Mail className="h-3 w-3" />
+          <span className="inline-flex items-center gap-2">
+            <Mail className="h-4 w-4 text-success" />
             <a href={`mailto:${founder.email}`} className="hover:underline">
               {founder.email}
             </a>
           </span>
         )}
         {founder.phone && (
-          <span className="inline-flex items-center gap-1.5">
-            <Phone className="h-3 w-3" />
+          <span className="inline-flex items-center gap-2">
+            <Phone className="h-4 w-4 text-success" />
             <a href={`tel:${founder.phone}`} className="hover:underline">
               {founder.phone}
             </a>
@@ -47,81 +50,12 @@ function FounderContact({ founder }) {
   );
 }
 
-function RequestCard({ request, busy, onAccept, onDecline }) {
-  const { startup, requestedBy, status } = request;
-  const isPending = status === "Requested";
-  const isPaid = status === "Paid";
-
-  return (
-    <Card>
-      <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-display text-base font-semibold text-ink">
-          {startup?.name || "Deleted startup"}
-        </h3>
-        <Badge
-          tone={
-            isPaid
-              ? "success"
-              : status === "Accepted"
-              ? "info"
-              : status === "Declined"
-              ? "danger"
-              : "warning"
-          }
-        >
-          {status}
-        </Badge>
-      </div>
-
-      <p className="text-xs text-muted">
-        {[startup?.industry, startup?.stage].filter(Boolean).join(" · ")}
-      </p>
-      {startup?.tagline && (
-        <p className="mt-1 text-sm text-ink">{startup.tagline}</p>
-      )}
-
-      <p className="mt-2 text-xs text-muted">
-        Requested by <span className="font-medium text-ink">{requestedBy?.name || "a founder"}</span>{" "}
-        on {formatDate(request.createdAt)}
-      </p>
-
-      {request.message && (
-        <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-muted">
-          "{request.message}"
-        </p>
-      )}
-
-      {isPaid && <FounderContact founder={requestedBy} />}
-
-      {isPending && (
-        <div className="mt-3 flex gap-2">
-          <Button
-            size="sm"
-            loading={busy === "accept"}
-            disabled={busy === "decline"}
-            onClick={onAccept}
-          >
-            Accept
-          </Button>
-          <Button
-            size="sm"
-            variant="danger"
-            loading={busy === "decline"}
-            disabled={busy === "accept"}
-            onClick={onDecline}
-          >
-            Decline
-          </Button>
-        </div>
-      )}
-    </Card>
-  );
-}
-
 export default function MentorQueue() {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { queue, queueStatus, error } = useSelector((state) => state.mentor);
+  
+  const [activeTab, setActiveTab] = useState("Pending");
   const [busy, setBusy] = useState({ id: null, action: null });
 
   useEffect(() => {
@@ -136,6 +70,7 @@ export default function MentorQueue() {
   };
 
   const handleDecline = async (id) => {
+    if (!window.confirm("Are you sure you want to decline this request?")) return;
     setBusy({ id, action: "decline" });
     await dispatch(declineMentorRequest(id));
     setBusy({ id: null, action: null });
@@ -145,91 +80,180 @@ export default function MentorQueue() {
     return <Loader label="Loading your queue" full />;
   }
 
-  const pending = queue.filter((r) => r.status === "Requested");
+  // Filter based on new database statuses
+  const pending = queue.filter((r) => r.status === "Pending");
   const accepted = queue.filter((r) => r.status === "Accepted");
-  const paid = queue.filter((r) => r.status === "Paid");
-  const resolved = queue.filter((r) => r.status === "Declined");
+  const declined = queue.filter((r) => r.status === "Declined" || r.status === "Cancelled");
+
+  const currentList = activeTab === "Pending" ? pending : activeTab === "Accepted" ? accepted : declined;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <h1 className="font-display text-xl font-semibold text-ink">Mentorship Requests</h1>
-      <p className="mt-1 mb-6 text-sm text-muted">
-        Founders who want to book a session with you. Accept or decline each request.
-      </p>
+    <div className="mx-auto max-w-4xl pb-20">
+      <div className="mb-8">
+        <h1 className="font-display text-2xl font-bold text-ink">Mentorship Workspace</h1>
+        <p className="mt-1 text-sm text-muted">
+          Manage your incoming requests, active mentorships, and session history.
+        </p>
+      </div>
 
       {!user?.isVerified && (
-        <div className="mb-4 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-sm text-gold-dark">
+        <div className="mb-6 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-sm text-gold-dark">
           Your mentor account is awaiting verification. You&apos;ll start
           receiving requests once an admin approves your profile.
         </div>
       )}
 
       {error && (
-        <div className="mb-4">
+        <div className="mb-6">
           <ErrorMessage message={error} onRetry={() => dispatch(fetchMentorQueue())} />
         </div>
       )}
 
-      {queue.length === 0 ? (
+      {/* Tabs */}
+      <div className="mb-6 flex gap-2 border-b border-border">
+        {[
+          { id: "Pending", label: "Requests", count: pending.length },
+          { id: "Accepted", label: "Active Mentorships", count: accepted.length },
+          { id: "Declined", label: "Archived", count: declined.length },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "border-gold text-gold-dark"
+                : "border-transparent text-muted hover:border-border-strong hover:text-ink"
+            }`}
+          >
+            {tab.label}
+            <span className={`rounded-full px-2 py-0.5 text-xs ${
+              activeTab === tab.id ? "bg-gold-soft text-gold-dark" : "bg-paper text-muted"
+            }`}>
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {currentList.length === 0 ? (
         <Card>
-          <p className="py-4 text-center text-sm text-muted">
-            No requests yet.
+          <p className="py-12 text-center text-sm text-muted">
+            No {activeTab.toLowerCase()} requests found.
           </p>
         </Card>
       ) : (
-        <>
-          {pending.length > 0 && (
-            <section className="mb-8">
-              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
-                Awaiting your response ({pending.length})
-              </h2>
-              <div className="flex flex-col gap-3">
-                {pending.map((r) => (
-                  <RequestCard
-                    key={r._id}
-                    request={r}
-                    busy={busy.id === r._id ? busy.action : null}
-                    onAccept={() => handleAccept(r._id)}
-                    onDecline={() => handleDecline(r._id)}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+        <div className="flex flex-col gap-4">
+          {currentList.map((req) => {
+            const isPending = req.status === "Pending";
+            const isAccepted = req.status === "Accepted";
+            const isPaid = req.paymentStatus === "Paid";
 
-          {accepted.length > 0 && (
-            <section className="mb-8">
-              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
-                Waiting for payment ({accepted.length})
-              </h2>
-              <div className="flex flex-col gap-3">
-                {accepted.map((r) => <RequestCard key={r._id} request={r} />)}
-              </div>
-            </section>
-          )}
+            return (
+              <Card key={req._id} className="overflow-hidden">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                  
+                  {/* Left: Request Info */}
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-start justify-between sm:justify-start gap-3">
+                      <div>
+                        <h3 className="font-display text-lg font-bold text-ink">
+                          {req.startup?.name || "Unknown Startup"}
+                        </h3>
+                        <p className="text-sm text-muted">
+                          Requested by <span className="font-medium text-ink">{req.founder?.name}</span> on {formatDate(req.createdAt)}
+                        </p>
+                      </div>
+                      <Badge tone={isPaid ? "success" : isAccepted ? "info" : isPending ? "warning" : "neutral"}>
+                        {isPaid ? "Paid" : req.status}
+                      </Badge>
+                    </div>
 
-          {paid.length > 0 && (
-            <section className="mb-8">
-              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
-                Confirmed sessions ({paid.length})
-              </h2>
-              <div className="flex flex-col gap-3">
-                {paid.map((r) => <RequestCard key={r._id} request={r} />)}
-              </div>
-            </section>
-          )}
+                    <div className="rounded-xl bg-paper p-4 space-y-3">
+                      <div>
+                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted mb-1">
+                          <AlertCircle className="h-3.5 w-3.5" /> Challenge
+                        </p>
+                        <p className="text-sm text-ink">{req.challenge || "Not specified"}</p>
+                      </div>
+                      <div>
+                        <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted mb-1">
+                          <Target className="h-3.5 w-3.5" /> Goals
+                        </p>
+                        <p className="text-sm text-ink">{req.goals || "Not specified"}</p>
+                      </div>
+                      {req.message && (
+                        <div className="pt-2 border-t border-border/50">
+                          <p className="text-sm italic text-muted">"{req.message}"</p>
+                        </div>
+                      )}
+                    </div>
 
-          {resolved.length > 0 && (
-            <section>
-              <h2 className="mb-3 font-display text-sm font-semibold text-ink">
-                Declined ({resolved.length})
-              </h2>
-              <div className="flex flex-col gap-3">
-                {resolved.map((r) => <RequestCard key={r._id} request={r} />)}
-              </div>
-            </section>
-          )}
-        </>
+                    {isPaid && <FounderContact founder={req.founder} />}
+                  </div>
+
+                  {/* Right: Actions & Price */}
+                  <div className="flex flex-col gap-4 sm:w-64 sm:border-l sm:border-border sm:pl-6">
+                    <div>
+                      <p className="text-xs text-muted">Session Rate</p>
+                      <p className="font-display text-xl font-bold text-ink">{formatINR(req.priceAtRequest)}</p>
+                    </div>
+
+                    {isPending && (
+                      <div className="flex flex-col gap-2 mt-auto">
+                        <Button
+                          onClick={() => handleAccept(req._id)}
+                          loading={busy.id === req._id && busy.action === "accept"}
+                          disabled={busy.id === req._id && busy.action === "decline"}
+                        >
+                          Accept Request
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="text-danger hover:bg-danger-bg"
+                          onClick={() => handleDecline(req._id)}
+                          loading={busy.id === req._id && busy.action === "decline"}
+                          disabled={busy.id === req._id && busy.action === "accept"}
+                        >
+                          Decline
+                        </Button>
+                      </div>
+                    )}
+
+                    {isAccepted && !isPaid && (
+                      <div className="mt-auto rounded-lg bg-warning-bg p-3 text-center text-xs text-gold-dark">
+                        Waiting for the founder to complete payment.
+                      </div>
+                    )}
+
+                                        {isPaid && req.sessionStatus !== "Completed" && (
+                      <div className="mt-auto flex flex-col gap-2">
+                        <div className="rounded-lg bg-success-bg p-3 text-center text-xs text-success font-medium">
+                          Paid — Ready for session
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if(window.confirm("Mark this session as completed? This will unlock the founder's ability to request you again.")) {
+                              dispatch(completeMentorSession(req._id));
+                            }
+                          }}
+                        >
+                          Mark as Completed
+                        </Button>
+                      </div>
+                    )}
+
+                    {req.sessionStatus === "Completed" && (
+                      <div className="mt-auto rounded-lg bg-navy/10 p-3 text-center text-xs text-navy font-medium">
+                        Session Completed
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       )}
     </div>
   );

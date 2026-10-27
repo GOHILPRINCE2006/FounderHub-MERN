@@ -4,67 +4,50 @@ const bcrypt = require("bcryptjs");
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: [true, "Name is required"], trim: true },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: 6,
-      select: false,
-    },
-    role: {
-      type: String,
-      enum: ["founder", "developer", "mentor", "investor", "admin"],
-      required: [true, "Role is required"],
-    },
+    email: { type: String, required: [true, "Email is required"], unique: true, lowercase: true, trim: true },
+    password: { type: String, required: [true, "Password is required"], minlength: 6, select: false },
+    role: { type: String, enum: ["founder", "developer", "mentor", "investor", "admin"], required: [true, "Role is required"] },
     avatar: { type: String, default: "" },
 
     // --- Common profile ---
-    phone: {
-      type: String,
-      default: "",
-      trim: true,
-      unique: true,
-      sparse: true,
-    },
+    phone: { type: String, default: "", trim: true, unique: true, sparse: true },
     location: { type: String, default: "", trim: true },
-    github:   { type: String, default: "", trim: true },
+    github: { type: String, default: "", trim: true },
     linkedin: { type: String, default: "", trim: true },
-    website:  { type: String, default: "", trim: true },
+    website: { type: String, default: "", trim: true },
     portfolioLinks: { type: [String], default: [] },
 
-    skills:     { type: [String], default: [] },
+    skills: { type: [String], default: [] },
     experience: { type: String, default: "" },
-    about:      { type: String, default: "" },
+    about: { type: String, default: "" },
 
     // --- Developer ---
-    availability: {
-      type: String,
-      enum: ["", "Full-time", "Part-time", "Internship"],
-      default: "",
-    },
+    availability: { type: String, enum: ["", "Full-time", "Part-time", "Internship"], default: "" },
 
     // --- Mentor ---
-    expertise:         { type: String, default: "", trim: true },
+    expertise: { type: String, default: "", trim: true },
     yearsOfExperience: { type: Number, default: 0, min: 0 },
-    currentRole:       { type: String, default: "", trim: true },
-    // Price per session in INR. Only meaningful for mentors.
-    sessionPrice:      { type: Number, default: 0, min: 0 },
+    currentRole: { type: String, default: "", trim: true },
+    sessionPrice: { type: Number, default: 0, min: 0 },
+    
+    // NEW Mentor Fields (MentorCruise style)
+    isAcceptingRequests: { type: Boolean, default: true },
+    languages: { type: [String], default: [] },
+    mentorshipFormat: { type: [String], default: [] }, // e.g. ["1-on-1", "Group"]
+
+    // --- Founder ---
+    // NEW: Founders can save mentors to their bookmarks
+    savedMentors: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
     // --- Mentor + Investor shared ---
     company: { type: String, default: "", trim: true },
 
     // --- Investor ---
     investmentFocus: { type: String, default: "", trim: true },
-    ticketSize:      { type: String, default: "", trim: true },
+    ticketSize: { type: String, default: "", trim: true },
 
     isVerified: { type: Boolean, default: false },
-    isActive:   { type: Boolean, default: true },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

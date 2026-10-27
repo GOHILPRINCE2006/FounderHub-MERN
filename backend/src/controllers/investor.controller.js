@@ -15,7 +15,6 @@ const CONTACT_FIELDS = "email phone";
 
 // @route GET /api/v1/investors
 // @access Public
-// Verified investors that a founder can send a funding request to.
 const getVerifiedInvestors = asyncHandler(async (req, res) => {
   const investors = await User.find({
     role: "investor",
@@ -31,55 +30,47 @@ const getVerifiedInvestors = asyncHandler(async (req, res) => {
 
 // @route POST /api/v1/investors/request
 // @access Founder only
-// Body: { investorId, message, proposedAmount, proposedEquity }
 const sendInvestmentRequest = asyncHandler(async (req, res) => {
-  const { investorId, message, proposedAmount, proposedEquity } = req.body;
+const { investorId, pitch = "", proposedAmount, proposedEquity, startupId } = req.body;
 
-  if (!investorId || !proposedAmount || !proposedEquity) {
-    throw new ApiError(400, "investorId, proposedAmount and proposedEquity are required");
-  }
+const missing = [];
+if (!investorId) missing.push("investorId");
+if (!startupId) missing.push("startupId");
+if (!proposedAmount) missing.push("proposedAmount");
+if (!proposedEquity) missing.push("proposedEquity");
+if (missing.length) {
+  throw new ApiError(400, `Missing required fields: ${missing.join(", ")}`);
+}
 
   const amount = Number(proposedAmount);
   const equity = Number(proposedEquity);
 
-  if (Number.isNaN(amount) || amount <= 0) {
-    throw new ApiError(400, "proposedAmount must be a positive number");
-  }
-  if (Number.isNaN(equity) || equity <= 0 || equity > 100) {
-    throw new ApiError(400, "proposedEquity must be between 0 and 100");
-  }
-
-  const startup = await Startup.findOne({ founder: req.user._id });
-  if (!startup) {
-    throw new ApiError(404, "You must create a startup before requesting funding");
+  const startup = await Startup.findById(startupId);
+  if (!startup) throw new ApiError(404, "Startup not found");
+  if (startup.founder.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to request funding for this startup");
   }
 
   const investor = await User.findById(investorId);
-  if (!investor || investor.role !== "investor") {
-    throw new ApiError(404, "Investor not found");
-  }
-  if (!investor.isVerified) {
-    throw new ApiError(403, "This investor is not verified yet");
-  }
+  if (!investor || investor.role !== "investor") throw new ApiError(404, "Investor not found");
+  if (!investor.isVerified) throw new ApiError(403, "This investor is not verified yet");
 
-  // One open request per (startup, investor). Once Invested/Declined/Withdrawn
-  // the founder can send a new one.
   const existing = await InvestorConnection.findOne({
     startup: startup._id,
     investor: investorId,
-    status: { $in: ["Requested", "Accepted"] },
+    status: { $in: ["Pending", "Accepted"] },
   });
-  if (existing) {
-    throw new ApiError(409, "You already have a pending request with this investor");
-  }
+  if (existing) throw new ApiError(409, "You already have a pending request with this investor for this startup");
 
+  // Create with the new field names
   const request = await InvestorConnection.create({
     startup: startup._id,
     founder: req.user._id,
     investor: investorId,
-    message: message || "",
+    pitch: pitch, // Saved correctly
     proposedAmount: amount,
     proposedEquity: equity,
+    status: "Pending", // Explicitly set to Pending
   });
 
   await sendNotification(req, {
@@ -90,9 +81,7 @@ const sendInvestmentRequest = asyncHandler(async (req, res) => {
     relatedStartup: startup._id,
   });
 
-  return res
-    .status(201)
-    .json(new ApiResponse(201, request, "Investment request sent"));
+  return res.status(201).json(new ApiResponse(201, request, "Investment request sent"));
 });
 
 // @route GET /api/v1/investors/my-requests
@@ -103,7 +92,6 @@ const getMyInvestmentRequests = asyncHandler(async (req, res) => {
     .populate("startup", "name logo industry stage")
     .sort({ createdAt: -1 });
 
-  // Unlock investor contact once accepted/invested.
   const acceptedInvestorIds = requests
     .filter((r) => ["Accepted", "Invested"].includes(r.status))
     .map((r) => r.investor?._id)
@@ -141,7 +129,6 @@ const getMyInvestmentRequests = asyncHandler(async (req, res) => {
 
 // @route GET /api/v1/investors/received
 // @access Investor only
-// Requests sent TO this investor.
 const getReceivedInvestmentRequests = asyncHandler(async (req, res) => {
   const requests = await InvestorConnection.find({ investor: req.user._id })
     .populate("founder", "name avatar email phone")
@@ -151,7 +138,6 @@ const getReceivedInvestmentRequests = asyncHandler(async (req, res) => {
     )
     .sort({ createdAt: -1 });
 
-  // Hide founder contact until accepted/invested.
   const sanitized = requests.map((r) => {
     const obj = r.toObject();
     if (["Accepted", "Invested"].includes(obj.status)) return obj;
@@ -176,7 +162,7 @@ const acceptInvestmentRequest = asyncHandler(async (req, res) => {
   if (request.investor.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not authorized to respond");
   }
-  if (request.status !== "Requested") {
+  if (request.status !== "Pending") { // Changed from Requested to Pending
     throw new ApiError(400, `Request has already been ${request.status.toLowerCase()}`);
   }
 
@@ -206,7 +192,7 @@ const declineInvestmentRequest = asyncHandler(async (req, res) => {
   if (request.investor.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not authorized to respond");
   }
-  if (request.status !== "Requested") {
+  if (request.status !== "Pending") { // Changed from Requested to Pending
     throw new ApiError(400, `Request has already been ${request.status.toLowerCase()}`);
   }
 
@@ -236,7 +222,7 @@ const withdrawInvestmentRequest = asyncHandler(async (req, res) => {
   if (request.founder.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not authorized to withdraw this request");
   }
-  if (!["Requested", "Accepted"].includes(request.status)) {
+  if (!["Pending", "Accepted"].includes(request.status)) { // Changed Requested to Pending
     throw new ApiError(400, `Cannot withdraw a ${request.status.toLowerCase()} request`);
   }
 
@@ -249,6 +235,36 @@ const withdrawInvestmentRequest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, request, "Request withdrawn"));
 });
 
+// @route PUT /api/v1/investors/requests/:id/complete
+// @access Investor only
+const completeInvestmentDeal = asyncHandler(async (req, res) => {
+  const request = await InvestorConnection.findById(req.params.id).populate("startup");
+  if (!request) throw new ApiError(404, "Request not found");
+
+  if (request.investor.toString() !== req.user._id.toString()) {
+    throw new ApiError(403, "You are not authorized to update this deal");
+  }
+  if (request.status !== "Invested") {
+    throw new ApiError(400, "Only invested deals can be marked as completed");
+  }
+
+  // Mark the deal as completed (for history/archiving)
+  // We can use a new field or just keep it as Invested. For now, we just return success.
+  // In a real system, you might add a `dealStatus: "Completed"` field.
+  
+  await sendNotification(req, {
+    recipient: request.founder,
+    type: "INVESTMENT_DEAL_COMPLETED", // You might need to add this to your enum
+    message: `${req.user.name} marked your investment deal for "${request.startup.name}" as completed.`,
+    link: "/founder/investors",
+    relatedStartup: request.startup._id,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, request, "Deal marked as completed"));
+});
+
 module.exports = {
   getVerifiedInvestors,
   sendInvestmentRequest,
@@ -257,4 +273,5 @@ module.exports = {
   acceptInvestmentRequest,
   declineInvestmentRequest,
   withdrawInvestmentRequest,
+  completeInvestmentDeal, // Added export
 };

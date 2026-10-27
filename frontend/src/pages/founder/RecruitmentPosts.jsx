@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import {
   fetchMyRecruitmentPosts,
   createRecruitmentPost,
@@ -20,6 +20,7 @@ import Loader from "../../components/common/Loader";
 import { Plus, X } from "lucide-react";
 
 export default function RecruitmentPosts() {
+  const { startupId } = useParams();
   const dispatch = useDispatch();
   const { myPosts, fetchStatus, actionStatus, error } = useSelector(
     (state) => state.recruitment
@@ -43,6 +44,7 @@ export default function RecruitmentPosts() {
     dispatch(clearRecruitmentError());
     const result = await dispatch(
       createRecruitmentPost({
+        startupId, // <-- Required now
         roleTitle: data.roleTitle,
         description: data.description,
         requiredSkills,
@@ -67,6 +69,9 @@ export default function RecruitmentPosts() {
     }
   };
 
+  // Filter posts to only show the ones for the ACTIVE startup in the URL
+  const activePosts = myPosts.filter(post => post.startup === startupId || post.startup?._id === startupId);
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-start justify-between gap-4">
@@ -75,30 +80,18 @@ export default function RecruitmentPosts() {
             Recruitment Posts
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Open roles developers can apply to. Each post is attached to your startup.
+            Open roles developers can apply to for this startup.
           </p>
         </div>
         <Button
           variant={showForm ? "outline" : "primary"}
           onClick={() => setShowForm((v) => !v)}
         >
-          {showForm ? (
-            <>
-              <X className="h-4 w-4" /> Cancel
-            </>
-          ) : (
-            <>
-              <Plus className="h-4 w-4" /> New Post
-            </>
-          )}
+          {showForm ? <><X className="h-4 w-4" /> Cancel</> : <><Plus className="h-4 w-4" /> New Post</>}
         </Button>
       </div>
 
-      {error && (
-        <div className="mb-4">
-          <ErrorMessage message={error} />
-        </div>
-      )}
+      {error && <div className="mb-4"><ErrorMessage message={error} /></div>}
 
       {showForm && (
         <Card className="mb-6">
@@ -130,17 +123,17 @@ export default function RecruitmentPosts() {
         </Card>
       )}
 
-      {fetchStatus === "loading" ? (
-        <Loader label="Loading your posts" />
-      ) : myPosts.length === 0 ? (
+      {fetchStatus === "loading" && myPosts.length === 0 ? (
+        <Loader label="Loading posts" />
+      ) : activePosts.length === 0 ? (
         <Card>
           <p className="py-4 text-center text-sm text-muted">
-            No recruitment posts yet. Create one to start receiving applications.
+            No recruitment posts yet for this startup. Create one to start receiving applications.
           </p>
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
-          {myPosts.map((post) => (
+          {activePosts.map((post) => (
             <Card key={post._id}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
@@ -154,17 +147,14 @@ export default function RecruitmentPosts() {
                   {post.requiredSkills?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {post.requiredSkills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted"
-                        >
+                        <span key={skill} className="rounded-full bg-paper px-2 py-0.5 text-xs text-muted">
                           {skill}
                         </span>
                       ))}
                     </div>
                   )}
                   <Link
-                    to={`/founder/recruitment/${post._id}/applications`}
+                    to={`/founder/${startupId}/recruitment/${post._id}/applications`}
                     className="mt-3 inline-block text-sm font-medium text-gold-dark hover:underline"
                   >
                     View applications →
@@ -174,11 +164,7 @@ export default function RecruitmentPosts() {
                   <Button variant="outline" size="sm" onClick={() => toggleOpen(post)}>
                     {post.isOpen ? "Close" : "Reopen"}
                   </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(post._id)}
-                  >
+                  <Button variant="danger" size="sm" onClick={() => handleDelete(post._id)}>
                     Delete
                   </Button>
                 </div>

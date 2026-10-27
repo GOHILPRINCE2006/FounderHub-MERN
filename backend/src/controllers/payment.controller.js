@@ -31,9 +31,12 @@ const createMentorOrder = asyncHandler(async (req, res) => {
 
   const request = await MentorFeedback.findById(mentorRequestId).populate("mentor", "name");
   if (!request) throw new ApiError(404, "Request not found");
-  if (request.requestedBy.toString() !== req.user._id.toString()) {
+  
+  // FIX 1: Changed from requestedBy to founder
+  if (request.founder.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "Not authorized to pay for this request");
   }
+  
   if (request.status !== "Accepted") {
     throw new ApiError(400, `Cannot pay — status is "${request.status}"`);
   }
@@ -101,7 +104,8 @@ const verifyMentorPayment = asyncHandler(async (req, res) => {
 
   const request = await MentorFeedback.findById(payment.mentorRequest);
   if (request && request.status === "Accepted") {
-    request.status = "Paid";
+    // FIX 2: Changed to paymentStatus to separate payment from request status
+    request.paymentStatus = "Paid";
     request.paidAt = new Date();
     await request.save();
 
@@ -121,7 +125,6 @@ const verifyMentorPayment = asyncHandler(async (req, res) => {
 
 // @route POST /api/v1/payments/investment/create-order
 // @access Investor only
-// Body: { investorConnectionId, amount, equityPercent }
 const createInvestmentOrder = asyncHandler(async (req, res) => {
   const { investorConnectionId, amount, equityPercent } = req.body;
   if (!investorConnectionId || !amount || !equityPercent) {

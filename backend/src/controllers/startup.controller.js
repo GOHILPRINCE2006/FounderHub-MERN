@@ -5,14 +5,12 @@ const Startup = require("../models/Startup");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 const { canViewPrivate } = require("../utils/checkStartupAccess");
 
-// Fields that are safe to return to anyone.
 const PUBLIC_FIELDS = [
   "_id", "name", "tagline", "industry", "logo", "location", "website",
   "requiredSkills", "requiredRoles", "lookingFor", "stage",
   "founder", "teamMembers", "isModerated", "createdAt", "updatedAt",
 ];
 
-// Fields returned ONLY when the viewer is authorized.
 const PRIVATE_FIELDS = [
   "problem", "solution", "teamSize", "foundingYear",
   "fundingStatus", "traction", "technologies",
@@ -29,7 +27,21 @@ const toFull = (startup) => {
   return obj;
 };
 
+// @route GET /api/v1/startups/my-startups
+// @access Founder only
+// Returns ALL startups this founder owns. Replaces the old /my-startup route.
+const getMyStartups = asyncHandler(async (req, res) => {
+  const startups = await Startup.find({ founder: req.user._id })
+    .populate("teamMembers", "name email avatar")
+    .sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, startups, "Your startups fetched successfully"));
+});
+
 // @route POST /api/v1/startups
+// @access Founder only
 const createStartup = asyncHandler(async (req, res) => {
   const {
     name, tagline, industry, location, website,
@@ -40,11 +52,6 @@ const createStartup = asyncHandler(async (req, res) => {
 
   if (!name || !tagline || !industry) {
     throw new ApiError(400, "Name, tagline, and industry are required");
-  }
-
-  const existingStartup = await Startup.findOne({ founder: req.user._id });
-  if (existingStartup) {
-    throw new ApiError(409, "You already have a startup. Only one startup per founder is allowed.");
   }
 
   let logoUrl = "";
@@ -58,6 +65,7 @@ const createStartup = asyncHandler(async (req, res) => {
     try { return JSON.parse(v); } catch { return []; }
   };
 
+  // REMOVED the check that prevented multiple startups.
   const startup = await Startup.create({
     founder: req.user._id,
     name,
@@ -85,6 +93,7 @@ const createStartup = asyncHandler(async (req, res) => {
 });
 
 // @route PUT /api/v1/startups/:id
+// @access Founder only (owner)
 const updateStartup = asyncHandler(async (req, res) => {
   const startup = await Startup.findById(req.params.id);
   if (!startup) throw new ApiError(404, "Startup not found");
@@ -129,6 +138,7 @@ const updateStartup = asyncHandler(async (req, res) => {
 });
 
 // @route DELETE /api/v1/startups/:id
+// @access Founder only (owner)
 const deleteStartup = asyncHandler(async (req, res) => {
   const startup = await Startup.findById(req.params.id);
   if (!startup) throw new ApiError(404, "Startup not found");
@@ -140,6 +150,7 @@ const deleteStartup = asyncHandler(async (req, res) => {
 });
 
 // @route GET /api/v1/startups/:id
+// @access Public / Optional Auth
 const getStartupById = asyncHandler(async (req, res) => {
   const startup = await Startup.findById(req.params.id)
     .populate("founder", "name email avatar")
@@ -161,18 +172,6 @@ const getStartupById = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .json(new ApiResponse(200, { ...payload, canViewPrivate: allowed }, "Startup fetched successfully"));
-});
-
-// @route GET /api/v1/startups/my-startup
-const getMyStartup = asyncHandler(async (req, res) => {
-  const startup = await Startup.findOne({ founder: req.user._id }).populate(
-    "teamMembers",
-    "name email avatar"
-  );
-  if (!startup) throw new ApiError(404, "You have not created a startup yet");
-  return res
-    .status(200)
-    .json(new ApiResponse(200, toFull(startup), "Your startup fetched successfully"));
 });
 
 // @route GET /api/v1/startups/my-teams
@@ -211,7 +210,6 @@ const getAllStartups = asyncHandler(async (req, res) => {
     .populate("founder", "name email avatar")
     .sort({ createdAt: -1 });
 
-  // List view is always public — no private fields ever returned here.
   const payload = startups.map(toPublic);
 
   return res
@@ -224,7 +222,7 @@ module.exports = {
   updateStartup,
   deleteStartup,
   getStartupById,
-  getMyStartup,
+  getMyStartups, // <-- Updated export
   getMyTeams,
   getAllStartups,
 };

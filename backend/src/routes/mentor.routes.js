@@ -8,6 +8,7 @@ const {
   acceptMentorRequest,
   declineMentorRequest,
   getMyMentorRequests,
+  completeMentorSession,
 } = require("../controllers/mentor.controller");
 
 const protect = require("../middlewares/auth.middleware");
@@ -19,5 +20,5 @@ router.get("/my-requests", protect, authorizeRoles("founder"), getMyMentorReques
 router.get("/queue", protect, authorizeRoles("mentor"), getMentorQueue);
 router.put("/requests/:id/accept", protect, authorizeRoles("mentor"), acceptMentorRequest);
 router.put("/requests/:id/decline", protect, authorizeRoles("mentor"), declineMentorRequest);
-
+router.put("/requests/:id/complete", protect, authorizeRoles("mentor"), completeMentorSession);
 module.exports = router;

@@ -18,9 +18,12 @@ export const fetchVerifiedInvestors = createAsyncThunk(
 
 export const sendInvestmentRequest = createAsyncThunk(
   "investor/sendInvestmentRequest",
-  async (payload, { dispatch, rejectWithValue }) => {
+  // THE FIX: Changed 'message' to 'pitch'
+  async ({ investorId, pitch, proposedAmount, proposedEquity, startupId }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/investors/request", payload);
+      const res = await axiosInstance.post("/investors/request", { 
+        investorId, pitch, proposedAmount, proposedEquity, startupId 
+      });
       await dispatch(fetchMyInvestmentRequests());
       return res.data.data;
     } catch (err) {
@@ -69,9 +72,11 @@ export const fetchReceivedInvestmentRequests = createAsyncThunk(
 
 export const respondToInvestmentRequest = createAsyncThunk(
   "investor/respondToInvestmentRequest",
-  async ({ id, decision }, { rejectWithValue }) => {
+  async ({ id, decision }, { dispatch, rejectWithValue }) => {
     try {
       const res = await axiosInstance.put(`/investors/requests/${id}/${decision}`);
+      // THE FIX: Force a refetch so the founder's contact info appears immediately
+      await dispatch(fetchReceivedInvestmentRequests());
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to respond");
@@ -102,7 +107,9 @@ export const verifyInvestmentPayment = createAsyncThunk(
   async (payload, { dispatch, rejectWithValue }) => {
     try {
       const res = await axiosInstance.post("/payments/investment/verify", payload);
+      // Force refetch after payment so the UI updates to "Invested"
       await dispatch(fetchReceivedInvestmentRequests());
+      await dispatch(fetchMyInvestmentRequests());
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Verification failed");
@@ -113,13 +120,10 @@ export const verifyInvestmentPayment = createAsyncThunk(
 const initialState = {
   investors: [],
   investorsStatus: "idle",
-
   myRequests: [],
   myRequestsStatus: "idle",
-
   received: [],
   receivedStatus: "idle",
-
   actionStatus: "idle",
   error: null,
 };
@@ -134,9 +138,7 @@ const investorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchVerifiedInvestors.pending, (state) => {
-        state.investorsStatus = "loading";
-      })
+      .addCase(fetchVerifiedInvestors.pending, (state) => { state.investorsStatus = "loading"; })
       .addCase(fetchVerifiedInvestors.fulfilled, (state, action) => {
         state.investorsStatus = "succeeded";
         state.investors = action.payload;
@@ -146,9 +148,7 @@ const investorSlice = createSlice({
         state.error = action.payload;
       })
 
-      .addCase(fetchMyInvestmentRequests.pending, (state) => {
-        state.myRequestsStatus = "loading";
-      })
+      .addCase(fetchMyInvestmentRequests.pending, (state) => { state.myRequestsStatus = "loading"; })
       .addCase(fetchMyInvestmentRequests.fulfilled, (state, action) => {
         state.myRequestsStatus = "succeeded";
         state.myRequests = action.payload;
@@ -173,20 +173,14 @@ const investorSlice = createSlice({
       .addCase(withdrawInvestmentRequest.fulfilled, (state, action) => {
         const idx = state.myRequests.findIndex((r) => r._id === action.payload._id);
         if (idx !== -1) {
-          state.myRequests[idx] = {
-            ...state.myRequests[idx],
-            status: action.payload.status,
-            respondedAt: action.payload.respondedAt,
-          };
+          state.myRequests[idx] = { ...state.myRequests[idx], status: action.payload.status, respondedAt: action.payload.respondedAt };
         }
       })
       .addCase(withdrawInvestmentRequest.rejected, (state, action) => {
         state.error = action.payload;
       })
 
-      .addCase(fetchReceivedInvestmentRequests.pending, (state) => {
-        state.receivedStatus = "loading";
-      })
+      .addCase(fetchReceivedInvestmentRequests.pending, (state) => { state.receivedStatus = "loading"; })
       .addCase(fetchReceivedInvestmentRequests.fulfilled, (state, action) => {
         state.receivedStatus = "succeeded";
         state.received = action.payload;
@@ -196,15 +190,8 @@ const investorSlice = createSlice({
         state.error = action.payload;
       })
 
-      .addCase(respondToInvestmentRequest.fulfilled, (state, action) => {
-        const idx = state.received.findIndex((r) => r._id === action.payload._id);
-        if (idx !== -1) {
-          state.received[idx] = {
-            ...state.received[idx],
-            status: action.payload.status,
-            respondedAt: action.payload.respondedAt,
-          };
-        }
+      .addCase(respondToInvestmentRequest.fulfilled, (state) => {
+        // Data is re-fetched in the thunk, no manual update needed here
       })
       .addCase(respondToInvestmentRequest.rejected, (state, action) => {
         state.error = action.payload;

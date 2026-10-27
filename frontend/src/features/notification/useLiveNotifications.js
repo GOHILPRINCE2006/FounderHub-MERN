@@ -2,24 +2,13 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { socket } from "../../api/socket";
 import { fetchNotifications, notificationReceived } from "./notificationSlice";
+import { fetchMentorQueue } from "../mentor/mentorSlice";
+import { fetchReceivedInvestmentRequests } from "../investor/investorSlice";
 
-/**
- * Owns the app-wide socket connection for as long as someone is logged in,
- * and keeps the notification list current. Call it once, high in the tree
- * (AppRoutes).
- *
- * - Logs in  -> connect the shared socket (the server puts it in a personal
- *   room, so "newNotification" pushes reach only this user) and load the list.
- * - Logs out -> disconnect.
- * - Reconnect after a drop -> reload the list, since pushes sent while the
- *   socket was down are gone.
- *
- * The team chat page does not connect or disconnect; it only joins a room on
- * this same socket (see features/chat/useTeamChat.js).
- */
 export default function useLiveNotifications() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.user?._id);
+  const userRole = useSelector((state) => state.auth.user?.role); // <-- Get the role
 
   useEffect(() => {
     if (!userId) return undefined;
@@ -27,7 +16,19 @@ export default function useLiveNotifications() {
     const handleNew = (notification) => dispatch(notificationReceived(notification));
     const handleReconnect = () => dispatch(fetchNotifications());
 
+    const handleDataUpdate = () => {
+      dispatch(fetchNotifications());
+      
+      // THE FIX: Only fetch data if the user has the correct role
+      if (userRole === "mentor") {
+        dispatch(fetchMentorQueue());
+      } else if (userRole === "investor") {
+        dispatch(fetchReceivedInvestmentRequests());
+      }
+    };
+
     socket.on("newNotification", handleNew);
+    socket.on("dataUpdated", handleDataUpdate);
     socket.io.on("reconnect", handleReconnect);
 
     dispatch(fetchNotifications());
@@ -35,8 +36,9 @@ export default function useLiveNotifications() {
 
     return () => {
       socket.off("newNotification", handleNew);
+      socket.off("dataUpdated", handleDataUpdate);
       socket.io.off("reconnect", handleReconnect);
       socket.disconnect();
     };
-  }, [userId, dispatch]);
+  }, [userId, userRole, dispatch]);
 }

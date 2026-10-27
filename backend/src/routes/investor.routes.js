@@ -9,6 +9,7 @@ const {
   acceptInvestmentRequest,
   declineInvestmentRequest,
   withdrawInvestmentRequest,
+  completeInvestmentDeal,
 } = require("../controllers/investor.controller");
 
 const protect = require("../middlewares/auth.middleware");
@@ -21,5 +22,6 @@ router.get("/received", protect, authorizeRoles("investor"), getReceivedInvestme
 router.put("/requests/:id/accept", protect, authorizeRoles("investor"), acceptInvestmentRequest);
 router.put("/requests/:id/decline", protect, authorizeRoles("investor"), declineInvestmentRequest);
 router.put("/requests/:id/withdraw", protect, authorizeRoles("founder"), withdrawInvestmentRequest);
+router.put("/requests/:id/complete", protect, authorizeRoles("investor"), completeInvestmentDeal);
 
 module.exports = router;

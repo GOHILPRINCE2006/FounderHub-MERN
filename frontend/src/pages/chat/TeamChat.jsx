@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { fetchMyTeams } from "../../features/chat/chatSlice";
 import useTeamChat from "../../features/chat/useTeamChat";
 import Badge from "../../components/common/Badge";
@@ -18,18 +18,13 @@ const CONNECTION_BADGE = {
 
 function formatTimestamp(iso) {
   const date = new Date(iso);
-  const time = date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   if (date.toDateString() === new Date().toDateString()) return time;
-  return `${date.toLocaleDateString([], {
-    month: "short",
-    day: "numeric",
-  })}, ${time}`;
+  return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${time}`;
 }
 
 export default function TeamChat() {
+  const { startupId } = useParams(); // <-- Get ID from URL for founders
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const {
@@ -49,7 +44,10 @@ export default function TeamChat() {
     dispatch(fetchMyTeams());
   }, [dispatch]);
 
-  const activeId = selectedId || teams[0]?._id || null;
+  // THE FIX: If we have a startupId from the URL (Founder workspace), use it.
+  // Otherwise, fall back to the selected ID or the first team (Developer view).
+  const activeId = startupId || selectedId || teams[0]?._id || null;
+  
   const { sendMessage } = useTeamChat(activeId);
 
   useEffect(() => {
@@ -76,10 +74,7 @@ export default function TeamChat() {
 
         {error && (
           <div className="mb-4">
-            <ErrorMessage
-              message={error}
-              onRetry={() => dispatch(fetchMyTeams())}
-            />
+            <ErrorMessage message={error} onRetry={() => dispatch(fetchMyTeams())} />
           </div>
         )}
 
@@ -94,15 +89,11 @@ export default function TeamChat() {
                 : "You'll get a team chat once a founder accepts your application."}
             </p>
             <Link
-              to={
-                user?.role === "founder" ? "/founder/startup" : "/opportunities"
-              }
+              to={user?.role === "founder" ? "/founder/create" : "/browse-startups"}
               className="mt-4"
             >
               <Button variant="secondary" size="sm">
-                {user?.role === "founder"
-                  ? "Go to My Startup"
-                  : "Browse Opportunities"}
+                {user?.role === "founder" ? "Go to My Startup" : "Browse Opportunities"}
               </Button>
             </Link>
           </div>
@@ -122,12 +113,13 @@ export default function TeamChat() {
           <h1 className="font-display text-lg font-semibold text-ink">
             Team Chat
           </h1>
-          <p className="truncate text-sm text-muted">{activeTeam?.name}</p>
+          <p className="truncate text-sm text-muted">{activeTeam?.name || "Unknown Team"}</p>
         </div>
         <div className="flex items-center gap-3">
-          {teams.length > 1 && (
+          {/* THE FIX: Only show the dropdown for Developers (who don't have a startupId in the URL) */}
+          {!startupId && teams.length > 1 && (
             <select
-              value={activeId}
+              value={activeId || ""}
               onChange={(e) => setSelectedId(e.target.value)}
               className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >

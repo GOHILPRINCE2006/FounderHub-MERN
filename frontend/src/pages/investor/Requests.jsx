@@ -147,7 +147,9 @@ function PayModal({ request, onClose }) {
 
 function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
   const { startup, founder, status } = request;
-  const isPending = status === "Requested";
+  
+  // THE FIX: Changed "Requested" to "Pending"
+  const isPending = status === "Pending";
   const isAccepted = status === "Accepted";
   const isInvested = status === "Invested";
 
@@ -215,9 +217,10 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
         </span>
       </div>
 
-      {request.message && (
+      {/* THE FIX: Changed request.message to request.pitch */}
+      {request.pitch && (
         <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-muted">
-          "{request.message}"
+          "{request.pitch}"
         </p>
       )}
 
@@ -314,7 +317,8 @@ export default function Requests() {
     return <Loader label="Loading requests" full />;
   }
 
-  const pending = received.filter((r) => r.status === "Requested");
+  // THE FIX: Changed "Requested" to "Pending"
+  const pending = received.filter((r) => r.status === "Pending");
   const accepted = received.filter((r) => r.status === "Accepted");
   const invested = received.filter((r) => r.status === "Invested");
   const declined = received.filter((r) => r.status === "Declined");

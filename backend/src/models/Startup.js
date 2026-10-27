@@ -6,9 +6,9 @@ const startupSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      // REMOVED the comment about one startup per founder. 
+      // Multiple startups per founder is now supported natively.
     },
-
-    // --- Public ---
     name: {
       type: String,
       required: [true, "Startup name is required"],
@@ -21,7 +21,6 @@ const startupSchema = new mongoose.Schema(
       maxlength: 120,
     },
     description: {
-      // kept for backward compatibility; no longer edited from the form
       type: String,
       default: "",
     },
@@ -66,8 +65,7 @@ const startupSchema = new mongoose.Schema(
       default: true,
     },
 
-    // --- Private (visible only to founder, team, approved investor,
-    //     requesting mentor, admin) ---
+    // --- Private ---
     problem: {
       type: String,
       default: "",

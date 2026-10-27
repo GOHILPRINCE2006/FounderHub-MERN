@@ -30,9 +30,19 @@ export const fetchMyMentorRequests = createAsyncThunk(
 
 export const requestMentor = createAsyncThunk(
   "mentor/requestMentor",
-  async ({ mentorId, message }, { dispatch, rejectWithValue }) => {
+  async ({ mentorId, message, startupId, challenge, goals, preferredFormat }, { dispatch, rejectWithValue }) => {
     try {
-      const res = await axiosInstance.post("/mentors/request", { mentorId, message });
+      // Log this to the console to verify what is being sent
+      console.log("Sending request payload:", { mentorId, startupId, challenge, goals });
+
+      const res = await axiosInstance.post("/mentors/request", { 
+        mentorId, 
+        message, 
+        startupId, 
+        challenge, 
+        goals, 
+        preferredFormat 
+      });
       await dispatch(fetchMyMentorRequests());
       return res.data.data;
     } catch (err) {
@@ -93,6 +103,18 @@ export const createPaymentOrder = createAsyncThunk(
   }
 );
 
+export const completeMentorSession = createAsyncThunk(
+  "mentor/completeMentorSession",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(`/mentors/requests/${id}/complete`);
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to complete session");
+    }
+  }
+);
+
 export const verifyPayment = createAsyncThunk(
   "mentor/verifyPayment",
   async (payload, { dispatch, rejectWithValue }) => {
@@ -109,13 +131,10 @@ export const verifyPayment = createAsyncThunk(
 const initialState = {
   mentors: [],
   mentorsStatus: "idle",
-
   myRequests: [],
   myRequestsStatus: "idle",
-
   queue: [],
   queueStatus: "idle",
-
   actionStatus: "idle",
   error: null,
 };
@@ -130,9 +149,7 @@ const mentorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchMentors.pending, (state) => {
-        state.mentorsStatus = "loading";
-      })
+      .addCase(fetchMentors.pending, (state) => { state.mentorsStatus = "loading"; })
       .addCase(fetchMentors.fulfilled, (state, action) => {
         state.mentorsStatus = "succeeded";
         state.mentors = action.payload;
@@ -142,9 +159,7 @@ const mentorSlice = createSlice({
         state.error = action.payload;
       })
 
-      .addCase(fetchMyMentorRequests.pending, (state) => {
-        state.myRequestsStatus = "loading";
-      })
+      .addCase(fetchMyMentorRequests.pending, (state) => { state.myRequestsStatus = "loading"; })
       .addCase(fetchMyMentorRequests.fulfilled, (state, action) => {
         state.myRequestsStatus = "succeeded";
         state.myRequests = action.payload;
@@ -166,9 +181,7 @@ const mentorSlice = createSlice({
         state.error = action.payload;
       })
 
-      .addCase(fetchMentorQueue.pending, (state) => {
-        state.queueStatus = "loading";
-      })
+      .addCase(fetchMentorQueue.pending, (state) => { state.queueStatus = "loading"; })
       .addCase(fetchMentorQueue.fulfilled, (state, action) => {
         state.queueStatus = "succeeded";
         state.queue = action.payload;
@@ -181,11 +194,7 @@ const mentorSlice = createSlice({
       .addCase(acceptMentorRequest.fulfilled, (state, action) => {
         const idx = state.queue.findIndex((r) => r._id === action.payload._id);
         if (idx !== -1) {
-          state.queue[idx] = {
-            ...state.queue[idx],
-            status: action.payload.status,
-            respondedAt: action.payload.respondedAt,
-          };
+          state.queue[idx] = { ...state.queue[idx], status: action.payload.status, respondedAt: action.payload.respondedAt };
         }
       })
       .addCase(acceptMentorRequest.rejected, (state, action) => {
@@ -195,16 +204,20 @@ const mentorSlice = createSlice({
       .addCase(declineMentorRequest.fulfilled, (state, action) => {
         const idx = state.queue.findIndex((r) => r._id === action.payload._id);
         if (idx !== -1) {
-          state.queue[idx] = {
-            ...state.queue[idx],
-            status: action.payload.status,
-            respondedAt: action.payload.respondedAt,
-          };
+          state.queue[idx] = { ...state.queue[idx], status: action.payload.status, respondedAt: action.payload.respondedAt };
         }
       })
       .addCase(declineMentorRequest.rejected, (state, action) => {
         state.error = action.payload;
       })
+
+      .addCase(completeMentorSession.fulfilled, (state, action) => {
+        const idx = state.queue.findIndex((r) => r._id === action.payload._id);
+        if (idx !== -1) {
+          state.queue[idx] = { ...state.queue[idx], sessionStatus: "Completed" };
+        }
+      })
+
 
       .addCase(logoutUser.fulfilled, () => initialState);
   },

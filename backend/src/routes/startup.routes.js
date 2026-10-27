@@ -6,7 +6,7 @@ const {
   updateStartup,
   deleteStartup,
   getStartupById,
-  getMyStartup,
+  getMyStartups, // <-- Updated import
   getMyTeams,
   getAllStartups,
 } = require("../controllers/startup.controller");
@@ -17,8 +17,8 @@ const authorizeRoles = require("../middlewares/role.middleware");
 const upload = require("../middlewares/upload.middleware");
 
 router.get("/", getAllStartups);
-router.get("/my-startup", protect, authorizeRoles("founder"), getMyStartup);
-router.get("/my-teams", protect, getMyTeams); // must stay above "/:id"
+router.get("/my-startups", protect, authorizeRoles("founder"), getMyStartups); // <-- Updated route
+router.get("/my-teams", protect, getMyTeams); 
 router.get("/:id", optionalAuth, getStartupById);
 
 router.post("/", protect, authorizeRoles("founder"), upload.single("logo"), createStartup);

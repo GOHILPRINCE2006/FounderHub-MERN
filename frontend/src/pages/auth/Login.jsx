@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser, clearAuthError } from "../../features/auth/authSlice";
+import { loginUser, clearAuthError, fetchCurrentUser } from "../../features/auth/authSlice";
+import { fetchMyStartups } from "../../features/startup/startupSlice"; // Import this
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
 import ErrorMessage from "../../components/common/ErrorMessage";
@@ -20,8 +21,21 @@ export default function Login() {
   const onSubmit = async (data) => {
     dispatch(clearAuthError());
     const result = await dispatch(loginUser(data));
+    
     if (loginUser.fulfilled.match(result)) {
-      navigate("/dashboard");
+      await dispatch(fetchCurrentUser());
+      
+      // If founder, redirect to their first startup. If no startup, go to create page.
+      if (result.payload.role === "founder") {
+        const startupsResult = await dispatch(fetchMyStartups()).unwrap();
+        if (startupsResult.length > 0) {
+          navigate(`/founder/${startupsResult[0]._id}/dashboard`);
+        } else {
+          navigate("/founder/create");
+        }
+      } else {
+        navigate("/dashboard");
+      }
     }
   };
 
@@ -31,11 +45,12 @@ export default function Login() {
         Log in to your account
       </h1>
 
-    {error && (
-    <div className="mb-4">
-        <ErrorMessage message={error} />
-    </div>
-    )}
+      {error && (
+        <div className="mb-4">
+          <ErrorMessage message={error} />
+        </div>
+      )}
+      
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
         <Input
           label="Email"
