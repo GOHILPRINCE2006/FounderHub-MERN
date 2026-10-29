@@ -1,5 +1,5 @@
-import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../features/auth/authSlice";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
+import authReducer, { logoutUser } from "../features/auth/authSlice";
 import startupReducer from "../features/startup/startupSlice";
 import recruitmentReducer from "../features/recruitment/recruitmentSlice";
 import applicationReducer from "../features/application/applicationSlice";
@@ -13,8 +13,7 @@ import progressReducer from "../features/progress/progressSlice";
 import adminReducer from "../features/admin/adminSlice";
 import fundingReducer from "../features/funding/fundingSlice";
 
-export const store = configureStore({
-  reducer: {
+const appReducer = combineReducers({
     auth: authReducer,
     startup: startupReducer,
     recruitment: recruitmentReducer,
@@ -28,5 +27,15 @@ export const store = configureStore({
     progress: progressReducer,
     admin: adminReducer,
     funding: fundingReducer,
-  },
 });
+
+// On logout wipe every slice except auth, so the next user who logs in on the
+// same browser tab never sees the previous user's startups/requests/profile.
+const rootReducer = (state, action) => {
+  if (action.type === logoutUser.fulfilled.type && state) {
+    state = { auth: state.auth };
+  }
+  return appReducer(state, action);
+};
+
+export const store = configureStore({ reducer: rootReducer });

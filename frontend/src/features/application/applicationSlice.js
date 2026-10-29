@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { fetchMyStartups } from "../startup/startupSlice";
 import axiosInstance from "../../api/axiosInstance";
 
 export const applyToPost = createAsyncThunk(
@@ -40,9 +41,11 @@ export const fetchApplicationsForPost = createAsyncThunk(
 
 export const acceptApplication = createAsyncThunk(
   "application/acceptApplication",
-  async (id, { rejectWithValue }) => {
+  async (id, { rejectWithValue, dispatch }) => {
     try {
       const res = await axiosInstance.put(`/applications/${id}/accept`);
+      // the new member must appear in the founder's team lists (task assignee dropdown etc.)
+      dispatch(fetchMyStartups());
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to accept application");
@@ -124,7 +127,8 @@ const applicationSlice = createSlice({
         const list = state.byPostId[postId];
         if (list) {
           const idx = list.findIndex((a) => a._id === action.payload._id);
-          if (idx !== -1) list[idx] = action.payload;
+          // keep the populated applicant, only take the new status
+          if (idx !== -1) list[idx].status = action.payload.status;
         }
       })
       .addCase(acceptApplication.rejected, (state, action) => {
@@ -136,7 +140,8 @@ const applicationSlice = createSlice({
         const list = state.byPostId[postId];
         if (list) {
           const idx = list.findIndex((a) => a._id === action.payload._id);
-          if (idx !== -1) list[idx] = action.payload;
+          // keep the populated applicant, only take the new status
+          if (idx !== -1) list[idx].status = action.payload.status;
         }
       });
   },

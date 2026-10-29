@@ -55,6 +55,7 @@ const investorConnectionSchema = new mongoose.Schema(
 
     respondedAt: { type: Date, default: null },
     paidAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
   },
   { timestamps: true }
 );

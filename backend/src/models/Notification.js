@@ -32,6 +32,8 @@ const notificationSchema = new mongoose.Schema(
         "INVESTMENT_REQUEST_ACCEPTED",
         "INVESTMENT_REQUEST_DECLINED",
         "INVESTMENT_PAYMENT_RECEIVED",
+        "INVESTMENT_DEAL_COMPLETED",
+        "INVESTMENT_REQUEST_WITHDRAWN",
       ],
       required: true,
     },

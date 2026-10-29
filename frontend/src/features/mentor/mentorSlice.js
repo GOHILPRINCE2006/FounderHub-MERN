@@ -33,7 +33,6 @@ export const requestMentor = createAsyncThunk(
   async ({ mentorId, message, startupId, challenge, goals, preferredFormat }, { dispatch, rejectWithValue }) => {
     try {
       // Log this to the console to verify what is being sent
-      console.log("Sending request payload:", { mentorId, startupId, challenge, goals });
 
       const res = await axiosInstance.post("/mentors/request", { 
         mentorId, 

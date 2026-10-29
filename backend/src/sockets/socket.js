@@ -77,6 +77,9 @@ const initializeSocket = (io) => {
         if (!content || !content.trim()) {
           return socket.emit("errorMessage", "Message cannot be empty");
         }
+        if (typeof content !== "string" || content.length > 2000) {
+          return socket.emit("errorMessage", "Message is too long (max 2000 characters)");
+        }
 
         const startup = await Startup.findById(startupId);
         if (!startup) {

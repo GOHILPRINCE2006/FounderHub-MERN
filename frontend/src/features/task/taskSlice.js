@@ -116,7 +116,9 @@ const taskSlice = createSlice({
       .addCase(updateTaskStatus.fulfilled, (state, action) => {
         const updateInList = (list) => {
           const idx = list.findIndex((t) => t._id === action.payload._id);
-          if (idx !== -1) list[idx] = action.payload;
+          // merge only the status: the response has assignedMember unpopulated,
+          // replacing the whole task made the card show "Unassigned"
+          if (idx !== -1) list[idx].status = action.payload.status;
         };
         updateInList(state.startupTasks);
         updateInList(state.myTasks);

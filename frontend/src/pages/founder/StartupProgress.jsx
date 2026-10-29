@@ -68,11 +68,10 @@ export default function StartupProgress() {
   
   const { data, fetchStatus, error } = useSelector((state) => state.progress);
 
+  // Clear first, then load: otherwise switching startups briefly shows the
+  // previous startup's numbers under the new startup's name.
   useEffect(() => {
     dispatch(clearProgress());
-  }, [dispatch]);
-
-  useEffect(() => {
     if (startupId) {
       dispatch(fetchStartupProgress(startupId));
     }

@@ -64,23 +64,6 @@ export default function DashboardHome() {
         { to: `/founder/${currentId}/investors`, label: "Investors", icon: TrendingUp, hint: "Send funding requests" },
         { to: `/founder/${currentId}/chat`, label: "Team Chat", icon: MessageSquare, hint: "Talk with your team" },
       ];
-    
-    // ... rest of the function
-      
-      if (!firstStartupId) {
-        return [
-          { to: "/founder/create", label: "Create Startup", icon: Rocket, hint: "Launch your first startup" }
-        ];
-      }
-
-      return [
-        { to: `/founder/${firstStartupId}/dashboard`, label: "My Startup", icon: Rocket, hint: "Open your workspace" },
-        { to: `/founder/${firstStartupId}/recruitment`, label: "Recruitment", icon: Users, hint: "Post roles" },
-        { to: `/founder/${firstStartupId}/tasks`, label: "Task Board", icon: Kanban, hint: "Assign work" },
-        { to: `/founder/${firstStartupId}/mentors`, label: "Mentors", icon: GraduationCap, hint: "Book a session" },
-        { to: `/founder/${firstStartupId}/investors`, label: "Investors", icon: TrendingUp, hint: "Send funding requests" },
-        { to: `/founder/${firstStartupId}/chat`, label: "Team Chat", icon: MessageSquare, hint: "Talk with your team" },
-      ];
     }
 
     if (user?.role === "developer") {

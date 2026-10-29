@@ -8,7 +8,7 @@ const sendNotification = require("../utils/sendNotification");
 
 // Public fields shown to founders browsing mentors.
 const MENTOR_PUBLIC_FIELDS =
-  "name avatar skills about experience expertise yearsOfExperience currentRole company linkedin sessionPrice isAcceptingRequests languages mentorshipFormat";
+  "name avatar skills about experience expertise yearsOfExperience currentRole company linkedin sessionPrice isAcceptingRequests languages mentorshipFormat isVerified";
 
 // @route GET /api/v1/mentors
 // @access Public
@@ -229,6 +229,10 @@ const completeMentorSession = asyncHandler(async (req, res) => {
 
   if (request.paymentStatus !== "Paid") {
     throw new ApiError(400, "Cannot complete a session that hasn't been paid for");
+  }
+
+  if (request.sessionStatus === "Completed") {
+    throw new ApiError(400, "This session is already marked as completed");
   }
 
   request.sessionStatus = "Completed";

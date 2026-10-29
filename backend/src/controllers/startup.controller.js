@@ -4,6 +4,9 @@ const ApiResponse = require("../utils/ApiResponse");
 const Startup = require("../models/Startup");
 const uploadToCloudinary = require("../utils/cloudinaryUpload");
 const { canViewPrivate } = require("../utils/checkStartupAccess");
+const { deleteStartupCascade } = require("../utils/cascadeDelete");
+
+const escapeRegex = (v) => String(v).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const PUBLIC_FIELDS = [
   "_id", "name", "tagline", "industry", "logo", "location", "website",
@@ -145,7 +148,7 @@ const deleteStartup = asyncHandler(async (req, res) => {
   if (startup.founder.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not authorized to delete this startup");
   }
-  await startup.deleteOne();
+  await deleteStartupCascade(startup._id);
   return res.status(200).json(new ApiResponse(200, {}, "Startup deleted successfully"));
 });
 
@@ -191,20 +194,23 @@ const getAllStartups = asyncHandler(async (req, res) => {
   const { keyword, skills, industry, stage, role } = req.query;
   const filter = { isModerated: true };
 
-  if (keyword) {
+  if (typeof keyword === "string" && keyword.trim()) {
+    const kw = escapeRegex(keyword.trim());
     filter.$or = [
-      { name: { $regex: keyword, $options: "i" } },
-      { tagline: { $regex: keyword, $options: "i" } },
-      { description: { $regex: keyword, $options: "i" } },
+      { name: { $regex: kw, $options: "i" } },
+      { tagline: { $regex: kw, $options: "i" } },
+      { description: { $regex: kw, $options: "i" } },
     ];
   }
-  if (industry) filter.industry = { $regex: industry, $options: "i" };
-  if (stage) filter.stage = stage;
-  if (skills) {
-    const skillsArray = skills.split(",").map((s) => s.trim());
-    filter.requiredSkills = { $in: skillsArray };
+  if (typeof industry === "string" && industry.trim()) {
+    filter.industry = { $regex: escapeRegex(industry.trim()), $options: "i" };
   }
-  if (role) filter.requiredRoles = { $in: [role] };
+  if (typeof stage === "string" && stage) filter.stage = stage;
+  if (typeof skills === "string" && skills.trim()) {
+    const skillsArray = skills.split(",").map((s) => s.trim()).filter(Boolean);
+    if (skillsArray.length) filter.requiredSkills = { $in: skillsArray };
+  }
+  if (typeof role === "string" && role) filter.requiredRoles = { $in: [role] };
 
   const startups = await Startup.find(filter)
     .populate("founder", "name email avatar")

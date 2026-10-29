@@ -55,10 +55,9 @@ const updateProfile = asyncHandler(async (req, res) => {
     updates.yearsOfExperience = n;
   }
 
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, updates, {
-    new: true,
-    runValidators: true,
-  });
+  const updatedUser = await User.findById(req.user._id);
+  updatedUser.set(updates);
+  await updatedUser.save(); // runs schema validators
 
   return res
     .status(200)
@@ -69,11 +68,9 @@ const updateProfile = asyncHandler(async (req, res) => {
 const uploadAvatar = asyncHandler(async (req, res) => {
   if (!req.file) throw new ApiError(400, "No image file provided");
   const result = await uploadToCloudinary(req.file.buffer, "foundrhub/avatars");
-  const updatedUser = await User.findByIdAndUpdate(
-    req.user._id,
-    { avatar: result.secure_url },
-    { new: true }
-  );
+  const updatedUser = await User.findById(req.user._id);
+  updatedUser.avatar = result.secure_url;
+  await updatedUser.save();
   return res
     .status(200)
     .json(new ApiResponse(200, updatedUser, "Avatar uploaded successfully"));

@@ -6,7 +6,8 @@ const { generateToken, sendTokenCookie } = require("../utils/generateToken");
 
 // @route POST /api/v1/auth/register
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role, phone } = req.body;
+  const { name, password, role, phone } = req.body;
+  const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : req.body.email;
 
   if (!name || !email || !password || !role || !phone) {
     throw new ApiError(400, "All fields are required");
@@ -64,7 +65,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
 // @route POST /api/v1/auth/login
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { password } = req.body;
+  const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : req.body.email;
 
   if (!email || !password) {
     throw new ApiError(400, "Email and password are required");

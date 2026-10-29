@@ -21,6 +21,20 @@ const getRazorpay = () => {
   return new Razorpay({ key_id: keyId, key_secret: keySecret });
 };
 
+// Constant-time signature check (Razorpay: HMAC_SHA256(order_id|payment_id, key_secret))
+const isValidSignature = (orderId, paymentId, signature) => {
+  const expected = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(`${orderId}|${paymentId}`)
+    .digest("hex");
+  const a = Buffer.from(expected);
+  const b = Buffer.from(String(signature));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
+
+// Razorpay needs an integer number of paise
+const toPaise = (rupees) => Math.round(Number(rupees) * 100);
+
 // =============== MENTOR PAYMENTS ===============
 
 // @route POST /api/v1/payments/mentor/create-order
@@ -40,13 +54,16 @@ const createMentorOrder = asyncHandler(async (req, res) => {
   if (request.status !== "Accepted") {
     throw new ApiError(400, `Cannot pay — status is "${request.status}"`);
   }
+  if (request.paymentStatus === "Paid") {
+    throw new ApiError(400, "This session has already been paid for");
+  }
   if (!request.priceAtRequest || request.priceAtRequest <= 0) {
     throw new ApiError(400, "Request has no valid price");
   }
 
   const razorpay = getRazorpay();
   const order = await razorpay.orders.create({
-    amount: request.priceAtRequest * 100,
+    amount: toPaise(request.priceAtRequest),
     currency: "INR",
     receipt: `mreq_${request._id}`,
     notes: { mentorRequestId: request._id.toString() },
@@ -86,14 +103,16 @@ const verifyMentorPayment = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Not authorized for this payment");
   }
 
-  const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest("hex");
+  // Already verified once (double click / retry) -> succeed without side effects
+  if (payment.status === "Paid") {
+    return res.status(200).json(new ApiResponse(200, { success: true }, "Payment already verified"));
+  }
 
-  if (expected !== razorpay_signature) {
-    payment.status = "Failed";
-    await payment.save();
+  if (!isValidSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature)) {
+    if (payment.status === "Created") {
+      payment.status = "Failed";
+      await payment.save();
+    }
     throw new ApiError(400, "Signature verification failed");
   }
 
@@ -103,7 +122,7 @@ const verifyMentorPayment = asyncHandler(async (req, res) => {
   await payment.save();
 
   const request = await MentorFeedback.findById(payment.mentorRequest);
-  if (request && request.status === "Accepted") {
+  if (request && request.status === "Accepted" && request.paymentStatus !== "Paid") {
     // FIX 2: Changed to paymentStatus to separate payment from request status
     request.paymentStatus = "Paid";
     request.paidAt = new Date();
@@ -152,7 +171,7 @@ const createInvestmentOrder = asyncHandler(async (req, res) => {
 
   const razorpay = getRazorpay();
   const order = await razorpay.orders.create({
-    amount: numericAmount * 100,
+    amount: toPaise(numericAmount),
     currency: "INR",
     receipt: `inv_${conn._id}`,
     notes: { investorConnectionId: conn._id.toString() },
@@ -197,14 +216,15 @@ const verifyInvestmentPayment = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Not authorized for this payment");
   }
 
-  const expected = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest("hex");
+  if (payment.status === "Paid") {
+    return res.status(200).json(new ApiResponse(200, { success: true }, "Payment already verified"));
+  }
 
-  if (expected !== razorpay_signature) {
-    payment.status = "Failed";
-    await payment.save();
+  if (!isValidSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature)) {
+    if (payment.status === "Created") {
+      payment.status = "Failed";
+      await payment.save();
+    }
     throw new ApiError(400, "Signature verification failed");
   }
 
@@ -213,9 +233,12 @@ const verifyInvestmentPayment = asyncHandler(async (req, res) => {
   payment.status = "Paid";
   await payment.save();
 
+  // "Withdrawn" is included on purpose: if the founder withdrew while the investor
+  // already had the checkout open, the money WAS captured, so the deal must be recorded.
   const conn = await InvestorConnection.findById(payment.investorConnection);
-  if (conn && conn.status === "Accepted") {
+  if (conn && ["Accepted", "Withdrawn"].includes(conn.status)) {
     conn.status = "Invested";
+    conn.paymentStatus = "Paid";
     conn.finalAmount = payment.amount;
     conn.finalEquity = payment.equityPercent;
     conn.paidAt = new Date();

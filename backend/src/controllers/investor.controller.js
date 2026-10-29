@@ -8,7 +8,7 @@ const sendNotification = require("../utils/sendNotification");
 
 // Fields the founder sees when browsing investors.
 const INVESTOR_PUBLIC_FIELDS =
-  "name avatar about company investmentFocus ticketSize linkedin website";
+  "name avatar about company investmentFocus ticketSize linkedin website isVerified";
 
 // Contact fields unlocked once the request status is Accepted or Invested.
 const CONTACT_FIELDS = "email phone";
@@ -44,6 +44,12 @@ if (missing.length) {
 
   const amount = Number(proposedAmount);
   const equity = Number(proposedEquity);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new ApiError(400, "Proposed amount must be a positive number");
+  }
+  if (!Number.isFinite(equity) || equity <= 0 || equity > 100) {
+    throw new ApiError(400, "Proposed equity must be between 0 and 100");
+  }
 
   const startup = await Startup.findById(startupId);
   if (!startup) throw new ApiError(404, "Startup not found");
@@ -230,6 +236,14 @@ const withdrawInvestmentRequest = asyncHandler(async (req, res) => {
   request.respondedAt = new Date();
   await request.save();
 
+  await sendNotification(req, {
+    recipient: request.investor,
+    type: "INVESTMENT_REQUEST_WITHDRAWN",
+    message: `${req.user.name} withdrew their investment request`,
+    link: "/investor/requests",
+    relatedStartup: request.startup,
+  });
+
   return res
     .status(200)
     .json(new ApiResponse(200, request, "Request withdrawn"));
@@ -248,13 +262,15 @@ const completeInvestmentDeal = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Only invested deals can be marked as completed");
   }
 
-  // Mark the deal as completed (for history/archiving)
-  // We can use a new field or just keep it as Invested. For now, we just return success.
-  // In a real system, you might add a `dealStatus: "Completed"` field.
-  
+  if (request.completedAt) {
+    throw new ApiError(400, "This deal is already marked as completed");
+  }
+  request.completedAt = new Date();
+  await request.save();
+
   await sendNotification(req, {
     recipient: request.founder,
-    type: "INVESTMENT_DEAL_COMPLETED", // You might need to add this to your enum
+    type: "INVESTMENT_DEAL_COMPLETED",
     message: `${req.user.name} marked your investment deal for "${request.startup.name}" as completed.`,
     link: "/founder/investors",
     relatedStartup: request.startup._id,

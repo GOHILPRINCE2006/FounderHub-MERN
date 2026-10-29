@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../../api/axiosInstance";
+import { updateProfile, uploadAvatar } from "../profile/profileSlice";
 
 // Register a new user (backend auto-logs-in via httpOnly cookie on success)
 export const registerUser = createAsyncThunk(
@@ -47,6 +48,20 @@ export const fetchCurrentUser = createAsyncThunk(
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Not authenticated");
+    }
+  }
+);
+
+// Silent re-sync of the logged-in user (e.g. after an admin verifies a mentor).
+// Unlike fetchCurrentUser it never logs the user out on a failed request.
+export const refreshCurrentUser = createAsyncThunk(
+  "auth/refreshCurrentUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/auth/me");
+      return res.data.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Refresh failed");
     }
   }
 );
@@ -111,6 +126,16 @@ const authSlice = createSlice({
         state.user = null;
         state.isAuthenticated = false;
         state.sessionChecked = true;
+      })
+      .addCase(refreshCurrentUser.fulfilled, (state, action) => {
+        if (state.isAuthenticated) state.user = action.payload;
+      })
+      // keep auth.user in sync after a profile save / avatar upload
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        if (state.user && action.payload?._id === state.user._id) state.user = action.payload;
+      })
+      .addCase(uploadAvatar.fulfilled, (state, action) => {
+        if (state.user && action.payload?._id === state.user._id) state.user = action.payload;
       });
   },
 });

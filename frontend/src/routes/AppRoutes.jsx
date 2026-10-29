@@ -79,32 +79,40 @@ export default function AppRoutes() {
           <Route path="/profile" element={<Profile />} />
 
           {/* 2. Founder Routes (create is strictly separate from :startupId) */}
-          <Route path="/founder/create" element={<ManageStartup />} />
+          <Route element={<ProtectedRoute allowedRoles={["founder"]} />}>
+            <Route path="/founder/create" element={<ManageStartup />} />
 
-          <Route path="/founder/:startupId" element={<StartupWorkspaceShell />}>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<StartupProgress />} />
-            <Route path="settings" element={<ManageStartup />} />
-            <Route path="recruitment" element={<RecruitmentPosts />} />
-            <Route path="recruitment/:postId/applications" element={<ApplicationReview />} />
-            <Route path="tasks" element={<KanbanBoard />} />
-            <Route path="chat" element={<TeamChat />} />
-            <Route path="mentors" element={<MentorFeedback />} />
-            <Route path="investors" element={<BrowseInvestors />} />
+            <Route path="/founder/:startupId" element={<StartupWorkspaceShell />}>
+              <Route index element={<Navigate to="dashboard" replace />} />
+              <Route path="dashboard" element={<StartupProgress />} />
+              <Route path="settings" element={<ManageStartup />} />
+              <Route path="recruitment" element={<RecruitmentPosts />} />
+              <Route path="recruitment/:postId/applications" element={<ApplicationReview />} />
+              <Route path="tasks" element={<KanbanBoard />} />
+              <Route path="chat" element={<TeamChat />} />
+              <Route path="mentors" element={<MentorFeedback />} />
+              <Route path="my-mentorships" element={<MyMentorships />} />
+              <Route path="investors" element={<BrowseInvestors />} />
+            </Route>
           </Route>
 
           {/* 3. Mentor Routes */}
-          <Route path="/mentor/queue" element={<MentorQueue />} />
-          <Route path="my-mentorships" element={<MyMentorships />} />
+          <Route element={<ProtectedRoute allowedRoles={["mentor"]} />}>
+            <Route path="/mentor/queue" element={<MentorQueue />} />
+          </Route>
 
           {/* 4. Investor Routes */}
-          <Route path="/investor/requests" element={<InvestorFundingRequests />} />
+          <Route element={<ProtectedRoute allowedRoles={["investor"]} />}>
+            <Route path="/investor/requests" element={<InvestorFundingRequests />} />
+          </Route>
 
           {/* 5. Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/startups" element={<AdminStartups />} />
-          <Route path="/admin/verifications" element={<AdminVerifications />} />
+          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/startups" element={<AdminStartups />} />
+            <Route path="/admin/verifications" element={<AdminVerifications />} />
+          </Route>
 
         </Route>
       </Route>

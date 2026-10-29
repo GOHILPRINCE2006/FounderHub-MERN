@@ -45,7 +45,7 @@ export default function BrowseOpportunities() {
         </Card>
       ) : (
         <div className="flex flex-col gap-3">
-          {openPosts.map((post) => (
+          {openPosts.filter((post) => post.startup?._id).map((post) => (
             <Link
               key={post._id}
               to={`/opportunities/${post.startup._id}`}

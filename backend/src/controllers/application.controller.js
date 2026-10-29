@@ -134,6 +134,8 @@ const acceptApplication = asyncHandler(async (req, res) => {
     relatedStartup: application.startup._id,
   });
 
+  await application.populate("applicant", "name email avatar skills about phone");
+
   return res
     .status(200)
     .json(new ApiResponse(200, application, "Application accepted successfully"));
@@ -166,6 +168,8 @@ const rejectApplication = asyncHandler(async (req, res) => {
     link: `/startups/${application.startup._id}`,
     relatedStartup: application.startup._id,
   });
+
+  await application.populate("applicant", "name email avatar skills about phone");
 
   return res
     .status(200)

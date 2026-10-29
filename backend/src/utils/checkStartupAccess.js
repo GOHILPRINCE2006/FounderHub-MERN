@@ -15,9 +15,11 @@ async function canViewPrivate(startup, userId, role) {
   if (role === "admin") return true;
 
   const uid = userId.toString();
+  // founder / teamMembers may be populated documents -> always compare by _id
+  const idOf = (v) => (v && v._id ? v._id : v).toString();
 
-  if (startup.founder.toString() === uid) return true;
-  if (startup.teamMembers.some((m) => m.toString() === uid)) return true;
+  if (idOf(startup.founder) === uid) return true;
+  if (startup.teamMembers.some((m) => idOf(m) === uid)) return true;
 
   if (role === "investor") {
     const conn = await InvestorConnection.findOne({

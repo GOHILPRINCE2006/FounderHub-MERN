@@ -240,7 +240,7 @@ export default function BrowseStartups() {
                       {startup.founder?.name && ` · ${startup.founder.name}`}
                     </p>
                     <p className="mt-2 line-clamp-2 text-sm text-muted">
-                      {startup.description}
+                      {startup.tagline || startup.description}
                     </p>
                     {startup.requiredSkills?.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1.5">

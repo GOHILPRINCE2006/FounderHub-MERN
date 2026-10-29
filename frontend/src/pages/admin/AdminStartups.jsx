@@ -10,7 +10,7 @@ import {
 import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
 import Button from "../../components/common/Button";
-import Loader from "../../components/common/Loader";
+//import Loader from "../../components/common/Loader";
 import ErrorMessage from "../../components/common/ErrorMessage";
 import { SkeletonList } from "../../components/common/Skeleton";
 
@@ -91,7 +91,7 @@ export default function AdminStartups() {
                     {s.founder?.name && ` · by ${s.founder.name}`}
                   </p>
                   <p className="mt-1 line-clamp-2 text-sm text-muted">
-                    {s.description}
+                    {s.tagline || s.description}
                   </p>
                 </div>
 

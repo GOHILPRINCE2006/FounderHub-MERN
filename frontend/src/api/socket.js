@@ -9,7 +9,9 @@ import { io } from "socket.io-client";
 //   The server reads it in sockets/socket.js.
 // - autoConnect: false: a page connects only when it needs to, which is
 //   always after login, so the cookie exists by then.
-export const socket = io({
+const SOCKET_URL = (import.meta.env.VITE_API_URL || "").replace(/\/$/, "");
+
+export const socket = io(SOCKET_URL || undefined, {
   withCredentials: true,
   autoConnect: false,
 });

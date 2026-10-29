@@ -1,10 +1,13 @@
-const dns = require("dns");
-
-// Force Node.js to use Google DNS for MongoDB SRV lookup
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
-
 const dotenv = require("dotenv");
 dotenv.config();
+
+const dns = require("dns");
+
+// Optional: force public DNS for MongoDB Atlas SRV lookups on networks whose
+// DNS blocks them. Off by default (cloud hosts don't need it).
+if (process.env.USE_GOOGLE_DNS === "true") {
+  dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -19,7 +22,7 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL,
+    origin: app.allowedOrigins && app.allowedOrigins.length ? app.allowedOrigins : false,
     credentials: true,
   },
 });

@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export default function ApplicationReview() {
-  const { postId } = useParams();
+  const { postId, startupId } = useParams();
   const dispatch = useDispatch();
   const { byPostId, reviewStatus, actionStatus, error } = useSelector(
     (state) => state.application
@@ -35,7 +35,7 @@ export default function ApplicationReview() {
   return (
     <div className="mx-auto max-w-3xl">
       <Link
-        to="/founder/recruitment"
+        to={`/founder/${startupId}/recruitment`}
         className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink"
       >
         <ArrowLeft className="h-4 w-4" /> Back to posts

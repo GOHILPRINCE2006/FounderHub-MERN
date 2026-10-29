@@ -55,7 +55,12 @@ const getMyRecruitmentPosts = asyncHandler(async (req, res) => {
 
 // @route GET /api/v1/recruitments
 const getAllRecruitmentPosts = asyncHandler(async (req, res) => {
-  const posts = await RecruitmentPost.find({ isOpen: true })
+  // Only posts of visible (non-moderated-away) startups are public
+  const visible = await Startup.find({ isModerated: true }).select("_id");
+  const posts = await RecruitmentPost.find({
+    isOpen: true,
+    startup: { $in: visible.map((s) => s._id) },
+  })
     .populate("startup", "name logo industry stage")
     .sort({ createdAt: -1 });
 

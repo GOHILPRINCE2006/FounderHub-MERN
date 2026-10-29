@@ -56,7 +56,18 @@ export default function StartupDetail() {
     }
   };
 
-  if (detailStatus === "loading" || !activeStartup) {
+  if (detailStatus === "failed" && (!activeStartup || activeStartup._id !== id)) {
+    return (
+      <div className="mx-auto max-w-md py-16 text-center">
+        <p className="text-ink">This startup could not be found.</p>
+        <Link to="/opportunities" className="mt-3 inline-block text-gold-dark underline">
+          Back to opportunities
+        </Link>
+      </div>
+    );
+  }
+
+  if (detailStatus === "loading" || !activeStartup || activeStartup._id !== id) {
     return <Loader label="Loading startup" full />;
   }
 
