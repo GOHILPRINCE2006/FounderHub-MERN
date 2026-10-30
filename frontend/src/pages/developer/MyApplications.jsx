@@ -68,7 +68,7 @@ export default function MyApplications() {
             <Card key={app._id}>
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-display text-base font-semibold text-ink">
+                  <h3 className="break-words font-display text-base font-semibold text-ink">
                     {app.recruitmentPost?.roleTitle}
                   </h3>
                   <p className="text-sm text-muted">
@@ -76,7 +76,9 @@ export default function MyApplications() {
                     {app.startup?.industry && ` · ${app.startup.industry}`}
                   </p>
                 </div>
-                <Badge status={app.status} />
+                <div className="shrink-0">
+                  <Badge status={app.status} />
+                </div>
               </div>
             </Card>
           ))}

@@ -107,7 +107,7 @@ export default function AdminVerifications() {
 
             return (
               <Card key={u._id}>
-                <div className="flex items-start gap-4">
+                <div className="flex flex-wrap items-start gap-4">
                   {u.avatar ? (
                     <img
                       src={u.avatar}
@@ -120,15 +120,15 @@ export default function AdminVerifications() {
                     </span>
                   )}
 
-                  <div className="min-w-0 flex-1">
+                  <div className="min-w-[calc(100%-4.5rem)] flex-1 sm:min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-semibold text-ink">
+                      <h3 className="break-words font-display text-base font-semibold text-ink">
                         {u.name}
                       </h3>
                       <Badge tone="warning">Pending</Badge>
                       {isIncomplete && <Badge tone="danger">Incomplete</Badge>}
                     </div>
-                    <p className="text-xs text-muted">{u.email}</p>
+                    <p className="break-all text-xs text-muted">{u.email}</p>
 
                     {(u.currentRole || u.company) && (
                       <p className="mt-1 text-sm text-ink">
@@ -163,7 +163,7 @@ export default function AdminVerifications() {
                     )}
 
                     {u.about && (
-                      <p className="mt-2 text-sm text-ink">{u.about}</p>
+                      <p className="mt-2 break-words text-sm text-ink">{u.about}</p>
                     )}
 
                     {u.skills?.length > 0 && (
@@ -222,9 +222,10 @@ export default function AdminVerifications() {
                     )}
                   </div>
 
-                  <div className="flex shrink-0 flex-col gap-2">
+                  <div className="flex w-full shrink-0 gap-2 sm:w-auto sm:flex-col">
                     <Button
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       loading={busyId === u._id}
                       disabled={isIncomplete}
                       onClick={() => handleApprove(u)}
@@ -234,6 +235,7 @@ export default function AdminVerifications() {
                     <Button
                       size="sm"
                       variant="danger"
+                      className="flex-1 sm:flex-none"
                       loading={busyId === u._id}
                       onClick={() => handleRevoke(u)}
                     >

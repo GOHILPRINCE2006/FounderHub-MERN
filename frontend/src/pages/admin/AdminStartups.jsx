@@ -95,7 +95,7 @@ export default function AdminStartups() {
                   </p>
                 </div>
 
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
                   {s.isModerated ? (
                     <Button
                       size="sm"

@@ -98,7 +98,7 @@ export default function StartupDetail() {
           )}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="font-display text-xl font-semibold text-ink">
+              <h1 className="break-words font-display text-xl font-semibold text-ink">
                 {activeStartup.name}
               </h1>
               <Badge status={activeStartup.stage} />
@@ -111,7 +111,7 @@ export default function StartupDetail() {
         </div>
 
         {activeStartup.tagline && (
-          <p className="mt-4 text-sm text-ink">{activeStartup.tagline}</p>
+          <p className="mt-4 break-words text-sm text-ink">{activeStartup.tagline}</p>
         )}
 
         {activeStartup.lookingFor?.length > 0 && (
@@ -152,19 +152,19 @@ export default function StartupDetail() {
               {activeStartup.problem && (
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-muted">Problem</p>
-                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.problem}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-ink">{activeStartup.problem}</p>
                 </div>
               )}
               {activeStartup.solution && (
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-muted">Solution</p>
-                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.solution}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-ink">{activeStartup.solution}</p>
                 </div>
               )}
               {activeStartup.traction && (
                 <div>
                   <p className="text-xs font-medium uppercase tracking-wider text-muted">Traction</p>
-                  <p className="mt-1 whitespace-pre-wrap text-ink">{activeStartup.traction}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-ink">{activeStartup.traction}</p>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-4 border-t border-border pt-4">
@@ -250,7 +250,7 @@ export default function StartupDetail() {
                 <h3 className="font-display text-base font-semibold text-ink">
                   {post.roleTitle}
                 </h3>
-                <p className="mt-1 text-sm text-muted">{post.description}</p>
+                <p className="mt-1 break-words text-sm text-muted">{post.description}</p>
                 {post.requiredSkills?.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1.5">
                     {post.requiredSkills.map((skill) => (

@@ -111,7 +111,7 @@ export default function Register() {
           </label>
           <select
             id="role"
-            className={`rounded-lg border bg-surface px-3 py-2 text-sm text-ink
+            className={`w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink sm:text-sm
               focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
               ${errors.role ? "border-danger" : "border-border"}`}
             {...register("role", {

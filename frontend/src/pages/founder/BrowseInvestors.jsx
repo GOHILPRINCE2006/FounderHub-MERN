@@ -64,16 +64,16 @@ function RequestModal({ investor, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-xl">
-        <div className="flex items-start justify-between">
+    <div className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-ink/40 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-4 shadow-xl sm:p-5">
+        <div className="flex items-start justify-between gap-3">
           <h3 className="font-display text-base font-semibold text-ink">
             Request funding from {investor.name}
           </h3>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1 text-muted hover:bg-paper"
+            className="shrink-0 rounded-lg p-1 text-muted hover:bg-paper"
           >
             <X className="h-4 w-4" />
           </button>
@@ -116,7 +116,7 @@ function RequestModal({ investor, onClose }) {
             The investor can accept, decline, or contact you to negotiate terms. You pay nothing at this step.
           </p>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
@@ -160,7 +160,7 @@ function MyRequestCard({ request }) {
         <Avatar user={investor} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-base font-semibold text-ink">
+            <h3 className="min-w-0 break-words font-display text-base font-semibold text-ink">
               {investor?.name || "Unknown investor"}
             </h3>
             <Badge
@@ -193,7 +193,7 @@ function MyRequestCard({ request }) {
           )}
 
           {request.pitch && (
-            <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-muted">
+            <p className="mt-2 break-words rounded-lg bg-paper p-3 text-sm text-muted">
               "{request.pitch}"
             </p>
           )}
@@ -211,15 +211,15 @@ function MyRequestCard({ request }) {
               <div className="mt-1.5 flex flex-col gap-1 text-xs text-ink">
                 {investor.email && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Mail className="h-3 w-3" />
-                    <a href={`mailto:${investor.email}`} className="hover:underline">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <a href={`mailto:${investor.email}`} className="break-all hover:underline">
                       {investor.email}
                     </a>
                   </span>
                 )}
                 {investor.phone && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Phone className="h-3 w-3" />
+                    <Phone className="h-3 w-3 shrink-0" />
                     <a href={`tel:${investor.phone}`} className="hover:underline">
                       {investor.phone}
                     </a>
@@ -234,6 +234,7 @@ function MyRequestCard({ request }) {
               <Button
                 size="sm"
                 variant="outline"
+                className="w-full sm:w-auto"
                 loading={withdrawing}
                 disabled={withdrawing}
                 onClick={handleWithdraw}
@@ -370,9 +371,9 @@ export default function BrowseInvestors() {
                   <div className="flex flex-col sm:flex-row">
                     
                     {/* LEFT SIDE: Warm background, Avatar & Name */}
-                    <div className="flex flex-col items-center border-b border-border bg-[#FAF7F2] p-6 sm:w-64 sm:border-b-0 sm:border-r">
+                    <div className="flex flex-col items-center border-b border-border bg-[#FAF7F2] p-4 sm:w-64 sm:border-b-0 sm:border-r sm:p-6">
                       <Avatar user={inv} size="lg" />
-                      <h3 className="mt-4 font-display text-lg font-bold text-ink text-center">{inv.name}</h3>
+                      <h3 className="mt-4 break-words font-display text-lg font-bold text-ink text-center">{inv.name}</h3>
                       {inv.company && <p className="mt-1 text-center text-sm font-medium text-ink">{inv.company}</p>}
                       
                       {inv.ticketSize && (
@@ -389,9 +390,9 @@ export default function BrowseInvestors() {
                     </div>
 
                     {/* RIGHT SIDE: Details */}
-                    <div className="flex flex-1 flex-col justify-between p-6">
+                    <div className="flex min-w-0 flex-1 flex-col justify-between p-4 sm:p-6">
                       <div>
-                        <p className="text-sm leading-relaxed text-muted">
+                        <p className="break-words text-sm leading-relaxed text-muted">
                           {inv.about || "No bio provided."}
                         </p>
                         
@@ -406,7 +407,7 @@ export default function BrowseInvestors() {
                         )}
                       </div>
 
-                      <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+                      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
                         <div>
                           <p className="text-xs text-muted">Focus</p>
                           <p className="font-display text-lg font-bold text-ink">

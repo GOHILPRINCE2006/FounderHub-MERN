@@ -83,12 +83,13 @@ export default function KanbanBoard() {
 
   return (
     <div>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+      <div className="mb-6 flex items-start justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
           <h1 className="font-display text-xl font-semibold text-ink">Task Board</h1>
-          <p className="mt-1 text-sm text-muted">{activeStartup.name}</p>
+          <p className="mt-1 truncate text-sm text-muted">{activeStartup.name}</p>
         </div>
         <Button
+          className="shrink-0"
           variant={showForm ? "outline" : "primary"}
           onClick={() => setShowForm((v) => !v)}
         >
@@ -125,13 +126,13 @@ export default function KanbanBoard() {
               placeholder="Details about this task"
               {...register("description")}
             />
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <label htmlFor="assignedMember" className="text-sm font-medium text-ink">
                 Assign to (optional)
               </label>
               <select
                 id="assignedMember"
-                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-sm"
                 {...register("assignedMember")}
                 defaultValue=""
               >
@@ -156,9 +157,9 @@ export default function KanbanBoard() {
       {fetchStatus === "loading" ? (
         <Loader label="Loading tasks" />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4">
           {columns.map((col) => (
-            <div key={col.status}>
+            <div key={col.status} className="min-w-0">
               <div
                 className={`mb-3 flex items-center justify-between border-t-2 ${COLUMN_STYLE[col.status]} pt-3`}
               >
@@ -177,18 +178,18 @@ export default function KanbanBoard() {
                   col.tasks.map((task) => (
                     <Card key={task._id} className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="font-medium text-ink">{task.title}</h3>
+                        <h3 className="min-w-0 break-words font-medium text-ink">{task.title}</h3>
                         <button
                           type="button"
                           onClick={() => handleDelete(task._id)}
-                          className="text-muted hover:text-danger"
+                          className="shrink-0 p-1 text-muted hover:text-danger"
                           aria-label="Delete task"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                       {task.description && (
-                        <p className="mt-1 text-sm text-muted">{task.description}</p>
+                        <p className="mt-1 break-words text-sm text-muted">{task.description}</p>
                       )}
                       <p className="mt-2 text-xs text-muted">
                         {task.assignedMember?.name
@@ -202,7 +203,7 @@ export default function KanbanBoard() {
                             updateTaskStatus({ id: task._id, status: e.target.value })
                           )
                         }
-                        className="mt-3 w-full rounded-lg border border-border bg-surface px-2 py-1 text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                        className="mt-3 w-full rounded-lg border border-border bg-surface px-2 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:py-1 sm:text-xs"
                       >
                         {STATUSES.map((s) => (
                           <option key={s} value={s}>

@@ -39,15 +39,15 @@ export default function WorkspaceSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
+        className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-white/10 sm:px-3"
       >
-        <Rocket className="h-4 w-4 text-gold" />
-        <span className="max-w-[150px] truncate">{label}</span>
-        <ChevronDown className="h-3.5 w-3.5 text-white/50" />
+        <Rocket className="h-4 w-4 shrink-0 text-gold" />
+        <span className="max-w-[80px] truncate sm:max-w-[150px]">{label}</span>
+        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-white/50" />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 w-64 rounded-xl border border-border bg-surface p-1 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-surface p-1 shadow-lg">
           <div className="px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
             Your Startups
           </div>
@@ -58,7 +58,7 @@ export default function WorkspaceSwitcher() {
                 setOpen(false);
                 navigate(`/founder/${s._id}/dashboard`);
               }}
-              className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-sm ${
+              className={`flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left text-sm ${
                 s._id === startupId
                   ? "bg-gold/10 font-medium text-gold-dark"
                   : "text-ink hover:bg-paper"
@@ -71,7 +71,7 @@ export default function WorkspaceSwitcher() {
           <Link
             to="/founder/create"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium text-gold-dark hover:bg-paper"
+            className="flex items-center gap-2 rounded-lg px-2 py-2.5 text-sm font-medium text-gold-dark hover:bg-paper"
           >
             <Plus className="h-4 w-4" />
             Create new startup

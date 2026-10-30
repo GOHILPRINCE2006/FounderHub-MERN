@@ -76,9 +76,9 @@ function RequestModal({ mentor, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border bg-paper px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-ink/60 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-border bg-surface shadow-2xl">
+        <div className="flex items-center justify-between border-b border-border bg-paper px-4 py-4 sm:px-6">
           <h3 className="font-display text-lg font-semibold text-ink">
             Request Mentorship
           </h3>
@@ -87,11 +87,11 @@ function RequestModal({ mentor, onClose }) {
           </button>
         </div>
         
-        <form onSubmit={submit} className="flex flex-col gap-5 p-6">
+        <form onSubmit={submit} className="flex flex-col gap-5 p-4 sm:p-6">
           <div className="flex items-center gap-4 rounded-xl bg-sand/30 p-4">
             <Avatar user={mentor} />
-            <div>
-              <p className="font-display font-semibold text-ink">{mentor.name}</p>
+            <div className="min-w-0">
+              <p className="break-words font-display font-semibold text-ink">{mentor.name}</p>
               <p className="text-sm text-muted">{mentor.currentRole} @ {mentor.company}</p>
               <p className="mt-1 text-sm font-medium text-gold-dark">₹{mentor.sessionPrice} / session</p>
             </div>
@@ -122,7 +122,7 @@ function RequestModal({ mentor, onClose }) {
             error={err}
           />
 
-          <div className="mt-2 flex justify-end gap-2">
+          <div className="mt-2 flex flex-wrap justify-end gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
@@ -212,7 +212,7 @@ function MyRequestCard({ request }) {
         <Avatar user={mentor} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-display text-base font-semibold text-ink">
+            <h3 className="min-w-0 break-words font-display text-base font-semibold text-ink">
               {mentor?.name || "Unknown mentor"}
             </h3>
             <Badge
@@ -248,13 +248,13 @@ function MyRequestCard({ request }) {
           )}
 
           {request.challenge && (
-            <p className="mt-2 text-sm text-ink">
+            <p className="mt-2 break-words text-sm text-ink">
               <span className="font-medium">Challenge:</span> {request.challenge}
             </p>
           )}
 
           {request.message && (
-            <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-muted">
+            <p className="mt-2 break-words rounded-lg bg-paper p-3 text-sm text-muted">
               "{request.message}"
             </p>
           )}
@@ -265,15 +265,15 @@ function MyRequestCard({ request }) {
               <div className="mt-1.5 flex flex-col gap-1 text-xs text-ink">
                 {mentor.email && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Mail className="h-3 w-3" />
-                    <a href={`mailto:${mentor.email}`} className="hover:underline">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <a href={`mailto:${mentor.email}`} className="break-all hover:underline">
                       {mentor.email}
                     </a>
                   </span>
                 )}
                 {mentor.phone && (
                   <span className="inline-flex items-center gap-1.5">
-                    <Phone className="h-3 w-3" />
+                    <Phone className="h-3 w-3 shrink-0" />
                     <a href={`tel:${mentor.phone}`} className="hover:underline">
                       {mentor.phone}
                     </a>
@@ -366,15 +366,15 @@ export default function MentorFeedback() {
 
       <div className="mx-auto mb-10 max-w-3xl">
         <div className="relative flex items-center rounded-xl border border-border bg-surface shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-2 focus-within:ring-gold">
-          <Search className="ml-4 h-5 w-5 text-muted" />
+          <Search className="ml-3 h-5 w-5 shrink-0 text-muted sm:ml-4" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by name, expertise, skills, or company..."
-            className="w-full bg-transparent px-4 py-4 text-base text-ink placeholder:text-muted focus:outline-none"
+            className="w-full min-w-0 bg-transparent px-3 py-3 text-base text-ink placeholder:text-muted focus:outline-none sm:px-4 sm:py-4"
           />
-          <Button className="mr-2 rounded-lg px-6">Search</Button>
+          <Button className="mr-2 shrink-0 rounded-lg px-4 sm:px-6">Search</Button>
         </div>
       </div>
 
@@ -424,9 +424,9 @@ export default function MentorFeedback() {
                 <div className="flex flex-col sm:flex-row">
                   
                   {/* LEFT SIDE: Avatar & Name (Warm background) */}
-                  <div className="flex flex-col items-center border-b border-border bg-[#FAF7F2] p-6 sm:w-64 sm:border-b-0 sm:border-r">
+                  <div className="flex flex-col items-center border-b border-border bg-[#FAF7F2] p-4 sm:w-64 sm:border-b-0 sm:border-r sm:p-6">
                     <Avatar user={mentor} size="lg" />
-                    <h3 className="mt-4 font-display text-lg font-bold text-ink text-center">{mentor.name}</h3>
+                    <h3 className="mt-4 break-words font-display text-lg font-bold text-ink text-center">{mentor.name}</h3>
                     <p className="mt-1 text-center text-sm font-medium text-ink">{mentor.currentRole}</p>
                     <p className="text-center text-sm text-muted">{mentor.company}</p>
                     
@@ -443,9 +443,9 @@ export default function MentorFeedback() {
                   </div>
 
                   {/* RIGHT SIDE: Details */}
-                  <div className="flex flex-1 flex-col justify-between p-6">
+                  <div className="flex min-w-0 flex-1 flex-col justify-between p-4 sm:p-6">
                     <div>
-                      <p className="text-sm leading-relaxed text-muted">
+                      <p className="break-words text-sm leading-relaxed text-muted">
                         {mentor.about || mentor.experience || "No bio provided."}
                       </p>
                       
@@ -460,7 +460,7 @@ export default function MentorFeedback() {
                       )}
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
+                    <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
                       <div>
                         <p className="text-xs text-muted">Starting from</p>
                         <p className="font-display text-2xl font-bold text-ink">

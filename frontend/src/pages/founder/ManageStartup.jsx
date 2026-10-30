@@ -112,7 +112,7 @@ export default function ManageStartup() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl py-8">
+    <div className="mx-auto max-w-2xl py-2 sm:py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="font-display text-xl font-semibold text-ink">
@@ -141,7 +141,7 @@ export default function ManageStartup() {
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
         {/* ===== PUBLIC ===== */}
         <Card>
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
             <Globe className="h-4 w-4 text-muted" />
             <h2 className="font-display text-sm font-semibold text-ink">
               Public details
@@ -156,10 +156,10 @@ export default function ManageStartup() {
                 <img
                   src={logoPreview}
                   alt="Logo"
-                  className="h-16 w-16 rounded-xl object-cover ring-1 ring-border"
+                  className="h-16 w-16 shrink-0 rounded-xl object-cover ring-1 ring-border"
                 />
               ) : (
-                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-paper ring-1 ring-border">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-paper ring-1 ring-border">
                   <Rocket className="h-6 w-6 text-muted" />
                 </div>
               )}
@@ -200,13 +200,13 @@ export default function ManageStartup() {
                 error={errors.industry?.message}
                 {...register("industry", { required: "Industry is required" })}
               />
-              <div className="flex flex-col gap-1.5">
+              <div className="flex min-w-0 flex-col gap-1.5">
                 <label htmlFor="stage" className="text-sm font-medium text-ink">
                   Stage *
                 </label>
                 <select
                   id="stage"
-                  className={`rounded-lg border bg-surface px-3 py-2 text-sm text-ink
+                  className={`w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink sm:text-sm
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
                     ${errors.stage ? "border-danger" : "border-border"}`}
                   {...register("stage", { required: "Please select a stage" })}
@@ -256,7 +256,7 @@ export default function ManageStartup() {
 
         {/* ===== PRIVATE ===== */}
         <Card>
-          <div className="mb-4 flex items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1">
             <Lock className="h-4 w-4 text-gold-dark" />
             <h2 className="font-display text-sm font-semibold text-ink">
               Private details
@@ -301,13 +301,13 @@ export default function ManageStartup() {
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-col gap-1.5">
               <label htmlFor="fundingStatus" className="text-sm font-medium text-ink">
                 Funding Status
               </label>
               <select
                 id="fundingStatus"
-                className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-sm"
                 {...register("fundingStatus")}
               >
                 <option value="">Not specified</option>

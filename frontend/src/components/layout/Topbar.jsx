@@ -43,12 +43,10 @@ export default function Topbar() {
 
   if (user?.role === "founder") {
     if (onCreatePage) {
-      // Creating a new startup: no workspace links
       navItems = [
         { label: "Back to Dashboard", to: "/dashboard", icon: <ArrowLeft className={ICON} /> },
       ];
     } else if (activeStartupId) {
-      // Inside a workspace: links strictly use the ID from the URL
       const base = `/founder/${activeStartupId}`;
       navItems = [
         { label: "My Startup",  to: `${base}/dashboard`,   icon: <BarChart3 className={ICON} /> },
@@ -61,8 +59,6 @@ export default function Topbar() {
         { label: "Create New",  to: `/founder/create`,     icon: <Plus className={ICON} /> },
       ];
     } else if (myStartups.length > 0) {
-      // Generic page (/dashboard, /profile, ...): no guessed workspace.
-      // Pick a workspace with the WorkspaceSwitcher.
       navItems = [
         { label: "Dashboard",  to: "/dashboard",      icon: <LayoutDashboard className={ICON} /> },
         { label: "Create New", to: "/founder/create", icon: <Plus className={ICON} /> },
@@ -85,7 +81,9 @@ export default function Topbar() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-white/5 bg-navy text-white">
-      <div className="flex h-16 items-center gap-4 px-6 sm:px-8">
+      {/* Phone: row 1 = brand + switcher + bell + avatar, row 2 = scrollable nav.
+          md and up: everything in one row (same as before). */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 sm:px-6 md:h-16 md:flex-nowrap md:gap-4 md:py-0 lg:px-8">
 
         {/* Brand (Not clickable) */}
         <div className="flex shrink-0 items-center gap-2.5 select-none">
@@ -97,34 +95,34 @@ export default function Topbar() {
           </span>
         </div>
 
-        {/* Workspace Switcher: show if the founder has startups */}
+        {/* Workspace Switcher */}
         {user?.role === "founder" && myStartups.length > 0 && (
-          <div className="border-l border-white/10 pl-4">
+          <div className="min-w-0 border-l border-white/10 pl-2 sm:pl-4">
             <WorkspaceSwitcher />
           </div>
         )}
 
-        {/* Primary nav */}
-        <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto scrollbar-thin ml-2">
+        {/* Primary nav: 2nd row on phone, inline on md+ */}
+        <nav className="scrollbar-thin order-last flex w-full items-center gap-0.5 overflow-x-auto pb-1 md:order-none md:ml-2 md:w-auto md:flex-1 md:pb-0">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end
               className={({ isActive }) =>
-                `flex shrink-0 items-center gap-2 rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                `flex shrink-0 items-center gap-2 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
                   isActive ? "bg-gold font-medium text-ink" : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`
               }
             >
               {item.icon}
-              <span className="hidden md:inline">{item.label}</span>
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* Right cluster */}
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5">
           <NotificationBell />
           <AvatarMenu />
         </div>

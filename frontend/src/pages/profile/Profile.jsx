@@ -141,7 +141,7 @@ export default function Profile() {
       <Card>
         {/* Avatar header */}
         <div className="mb-6 flex items-center gap-4">
-          <div className="relative">
+          <div className="relative shrink-0">
             {avatarPreview ? (
               <img
                 src={avatarPreview}
@@ -164,10 +164,10 @@ export default function Profile() {
             </label>
           </div>
           <div className="min-w-0">
-            <p className="font-display text-base font-semibold text-ink">
+            <p className="break-words font-display text-base font-semibold text-ink">
               {profile?.name}
             </p>
-            <p className="text-sm text-muted">{profile?.email}</p>
+            <p className="break-all text-sm text-muted">{profile?.email}</p>
             <p className="font-mono text-xs uppercase text-muted">{role}</p>
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function Profile() {
                 </label>
                 <select
                   id="availability"
-                  className={`rounded-lg border bg-surface px-3 py-2 text-sm text-ink
+                  className={`w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink sm:text-sm
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
                     ${errors.availability ? "border-danger" : "border-border"}`}
                   {...register("availability", {
@@ -339,27 +339,30 @@ export default function Profile() {
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-3">
                 <Code2 className="h-4 w-4 shrink-0 text-muted" />
-                <Input
-                  className="flex-1"
-                  placeholder="github.com/username"
-                  {...register("github")}
-                />
+                <div className="min-w-0 flex-1">
+                  <Input
+                    placeholder="github.com/username"
+                    {...register("github")}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <Briefcase className="h-4 w-4 shrink-0 text-muted" />
-                <Input
-                  className="flex-1"
-                  placeholder="linkedin.com/in/username"
-                  {...register("linkedin")}
-                />
+                <div className="min-w-0 flex-1">
+                  <Input
+                    placeholder="linkedin.com/in/username"
+                    {...register("linkedin")}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <Globe className="h-4 w-4 shrink-0 text-muted" />
-                <Input
-                  className="flex-1"
-                  placeholder="your-site.com"
-                  {...register("website")}
-                />
+                <div className="min-w-0 flex-1">
+                  <Input
+                    placeholder="your-site.com"
+                    {...register("website")}
+                  />
+                </div>
               </div>
             </div>
           </section>

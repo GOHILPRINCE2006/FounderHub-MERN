@@ -107,21 +107,21 @@ export default function TeamChat() {
   const canSend = connectionStatus === "connected" && draft.trim().length > 0;
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-8rem)] max-w-3xl flex-col">
-      <div className="mb-3 flex items-center justify-between gap-4">
+    <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-3xl flex-col md:h-[calc(100vh-8rem)]">
+      <div className="mb-3 flex items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
           <h1 className="font-display text-lg font-semibold text-ink">
             Team Chat
           </h1>
           <p className="truncate text-sm text-muted">{activeTeam?.name || "Unknown Team"}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-3">
           {/* THE FIX: Only show the dropdown for Developers (who don't have a startupId in the URL) */}
           {!startupId && teams.length > 1 && (
             <select
               value={activeId || ""}
               onChange={(e) => setSelectedId(e.target.value)}
-              className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              className="max-w-[40vw] rounded-lg border border-border bg-surface px-2 py-1 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:max-w-none sm:text-sm"
             >
               {teams.map((team) => (
                 <option key={team._id} value={team._id}>
@@ -145,7 +145,7 @@ export default function TeamChat() {
           ref={listRef}
           role="log"
           aria-live="polite"
-          className="flex-1 space-y-3 overflow-y-auto p-4 scrollbar-thin"
+          className="flex-1 space-y-3 overflow-y-auto p-3 scrollbar-thin sm:p-4"
         >
           {historyStatus === "loading" && <Loader label="Loading messages" />}
 
@@ -163,7 +163,7 @@ export default function TeamChat() {
                 className={`flex ${isMine ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${
+                  className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-sm sm:max-w-[75%] ${
                     isMine
                       ? "bg-navy text-white"
                       : "border border-border bg-paper text-ink"
@@ -190,7 +190,7 @@ export default function TeamChat() {
 
         <form
           onSubmit={handleSubmit}
-          className="flex gap-2 border-t border-border p-3"
+          className="flex gap-2 border-t border-border p-2 sm:p-3"
         >
           <input
             type="text"
@@ -201,9 +201,9 @@ export default function TeamChat() {
                 ? "Write a message..."
                 : "Waiting for connection..."
             }
-            className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-sm"
           />
-          <Button type="submit" disabled={!canSend}>
+          <Button type="submit" className="shrink-0" disabled={!canSend}>
             <Send className="h-4 w-4" />
             Send
           </Button>

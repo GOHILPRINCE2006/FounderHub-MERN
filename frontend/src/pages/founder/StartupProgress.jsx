@@ -35,13 +35,13 @@ function StatCard({ icon: Icon, label, value, sublabel, tone = "default" }) {
     danger: "bg-danger-bg text-danger",
   };
   return (
-    <Card className="p-4">
+    <Card className="min-w-0 p-4">
       <div className="flex items-start justify-between">
         <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${toneClasses[tone]}`}>
           <Icon className="h-4 w-4" />
         </span>
       </div>
-      <p className="mt-3 font-display text-2xl font-semibold text-ink">{value}</p>
+      <p className="mt-3 break-words font-display text-xl font-semibold text-ink sm:text-2xl">{value}</p>
       <p className="text-xs font-medium text-ink">{label}</p>
       {sublabel && <p className="mt-0.5 text-xs text-muted">{sublabel}</p>}
     </Card>
@@ -110,7 +110,7 @@ export default function StartupProgress() {
       <h1 className="font-display text-xl font-semibold text-ink">Progress</h1>
       <p className="mt-1 mb-6 text-sm text-muted">How {activeStartup.name} is moving.</p>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           icon={ListTodo}
           label="Total tasks"
@@ -145,11 +145,11 @@ export default function StartupProgress() {
         <h2 className="mb-3 font-display text-sm font-semibold text-ink">Funding</h2>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <Card className="p-4">
+          <Card className="min-w-0 p-4">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-success-bg text-success">
               <ArrowDownRight className="h-4 w-4" />
             </span>
-            <p className="mt-3 font-display text-2xl font-semibold text-ink">
+            <p className="mt-3 break-words font-display text-xl font-semibold text-ink sm:text-2xl">
               {formatINR(funding.moneyIn)}
             </p>
             <p className="text-xs font-medium text-ink">Money in</p>
@@ -159,22 +159,22 @@ export default function StartupProgress() {
             </p>
           </Card>
 
-          <Card className="p-4">
+          <Card className="min-w-0 p-4">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger-bg text-danger">
               <ArrowUpRight className="h-4 w-4" />
             </span>
-            <p className="mt-3 font-display text-2xl font-semibold text-ink">
+            <p className="mt-3 break-words font-display text-xl font-semibold text-ink sm:text-2xl">
               {formatINR(funding.moneyOut)}
             </p>
             <p className="text-xs font-medium text-ink">Money out</p>
             <p className="mt-0.5 text-xs text-muted">Paid to mentors</p>
           </Card>
 
-          <Card className="p-4">
+          <Card className="min-w-0 p-4">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy/10 text-navy">
               <IndianRupee className="h-4 w-4" />
             </span>
-            <p className="mt-3 font-display text-2xl font-semibold text-ink">
+            <p className="mt-3 break-words font-display text-xl font-semibold text-ink sm:text-2xl">
               {formatINR(funding.net)}
             </p>
             <p className="text-xs font-medium text-ink">Net balance</p>
@@ -194,20 +194,20 @@ export default function StartupProgress() {
                     <img
                       src={inv.investor.avatar}
                       alt={inv.investor.name}
-                      className="h-9 w-9 rounded-full object-cover"
+                      className="h-9 w-9 shrink-0 rounded-full object-cover"
                     />
                   ) : (
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-xs font-semibold text-white">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-xs font-semibold text-white">
                       {inv.investor.name?.[0] || "?"}
                     </span>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-ink">{inv.investor.name}</p>
+                    <p className="truncate text-sm font-medium text-ink">{inv.investor.name}</p>
                     {inv.investor.company && (
-                      <p className="text-xs text-muted">{inv.investor.company}</p>
+                      <p className="truncate text-xs text-muted">{inv.investor.company}</p>
                     )}
                   </div>
-                  <div className="text-right">
+                  <div className="shrink-0 text-right">
                     <p className="text-sm font-medium text-ink">{formatINR(inv.amount)}</p>
                     <p className="text-xs text-muted">for {inv.equityPercent}%</p>
                   </div>
@@ -231,7 +231,7 @@ export default function StartupProgress() {
             </span>
           </div>
           <ProgressBar value={taskStats.completionPercentage} />
-          <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-4 grid grid-cols-3 gap-2 text-center sm:gap-3">
             <div className="rounded-lg bg-paper p-3">
               <p className="font-display text-lg font-semibold text-ink">{taskStats.todo}</p>
               <p className="text-xs text-muted">To-Do</p>
@@ -330,7 +330,7 @@ export default function StartupProgress() {
                 <div key={i} className="flex items-start gap-3">
                   <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-gold" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm text-ink">{event.message}</p>
+                    <p className="break-words text-sm text-ink">{event.message}</p>
                     <p className="text-xs text-muted">
                       {ACTIVITY_LABEL[event.type] || event.type} · {formatDate(event.timestamp)}
                     </p>

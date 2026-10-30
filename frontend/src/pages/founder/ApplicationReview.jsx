@@ -100,7 +100,7 @@ export default function ApplicationReview() {
                   <div className="min-w-0 flex-1">
                     {/* Name + status */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-semibold text-ink">
+                      <h3 className="break-words font-display text-base font-semibold text-ink">
                         {a.name || "Unknown applicant"}
                       </h3>
                       <Badge status={app.status} />
@@ -115,15 +115,15 @@ export default function ApplicationReview() {
                     <div className="mt-1 flex flex-col gap-0.5 text-xs text-muted">
                       {a.email && (
                         <span className="inline-flex items-center gap-1.5">
-                          <Mail className="h-3 w-3" />
-                          <a href={`mailto:${a.email}`} className="hover:text-ink">
+                          <Mail className="h-3 w-3 shrink-0" />
+                          <a href={`mailto:${a.email}`} className="break-all hover:text-ink">
                             {a.email}
                           </a>
                         </span>
                       )}
                       {a.phone && (
                         <span className="inline-flex items-center gap-1.5">
-                          <Phone className="h-3 w-3" />
+                          <Phone className="h-3 w-3 shrink-0" />
                           <a href={`tel:${a.phone}`} className="hover:text-ink">
                             {a.phone}
                           </a>
@@ -131,7 +131,7 @@ export default function ApplicationReview() {
                       )}
                       {a.location && (
                         <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="h-3 w-3" />
+                          <MapPin className="h-3 w-3 shrink-0" />
                           {a.location}
                         </span>
                       )}
@@ -143,7 +143,7 @@ export default function ApplicationReview() {
                         <p className="text-xs font-medium uppercase tracking-wider text-muted">
                           Experience
                         </p>
-                        <p className="mt-0.5 text-sm text-ink">{a.experience}</p>
+                        <p className="mt-0.5 break-words text-sm text-ink">{a.experience}</p>
                       </div>
                     )}
 
@@ -153,7 +153,7 @@ export default function ApplicationReview() {
                         <p className="text-xs font-medium uppercase tracking-wider text-muted">
                           About
                         </p>
-                        <p className="mt-0.5 text-sm text-ink">{a.about}</p>
+                        <p className="mt-0.5 break-words text-sm text-ink">{a.about}</p>
                       </div>
                     )}
 
@@ -195,7 +195,7 @@ export default function ApplicationReview() {
                         <p className="mb-1 text-xs font-medium uppercase tracking-wider text-muted">
                           Cover message
                         </p>
-                        <p className="rounded-lg bg-paper p-3 text-sm text-ink">
+                        <p className="break-words rounded-lg bg-paper p-3 text-sm text-ink">
                           {app.coverMessage}
                         </p>
                       </div>

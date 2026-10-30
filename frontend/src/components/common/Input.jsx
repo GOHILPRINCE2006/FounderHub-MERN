@@ -9,7 +9,7 @@ const Input = forwardRef(function Input(
   const inputId = id || rest.name;
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex min-w-0 flex-col gap-1.5">
       {label && (
         <label htmlFor={inputId} className="text-sm font-medium text-ink">
           {label}
@@ -18,7 +18,7 @@ const Input = forwardRef(function Input(
       <input
         id={inputId}
         ref={ref}
-        className={`rounded-lg border bg-surface px-3 py-2 text-sm text-ink placeholder:text-muted
+        className={`w-full rounded-lg border bg-surface px-3 py-2 text-base text-ink placeholder:text-muted sm:text-sm
           focus:outline-none focus-visible:ring-2 focus-visible:ring-gold
           ${error ? "border-danger" : "border-border"} ${className}`}
         {...rest}

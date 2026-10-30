@@ -66,7 +66,7 @@ export default function BrowseOpportunities() {
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-semibold text-ink">
+                      <h3 className="break-words font-display text-base font-semibold text-ink">
                         {post.roleTitle}
                       </h3>
                       <Badge status={post.startup?.stage} />

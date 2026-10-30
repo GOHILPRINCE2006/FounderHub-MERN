@@ -30,7 +30,7 @@ export default function MyTasks() {
         <p className="mt-1 mb-6 text-sm text-muted">
           Tasks assigned to you across your teams.
         </p>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4">
           {["To-Do", "In Progress", "Done"].map((s) => (
             <div key={s}>
               <div className="mb-3 border-t-2 border-t-border-strong pt-3">
@@ -69,9 +69,9 @@ export default function MyTasks() {
           </p>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-4">
           {grouped.map((col) => (
-            <div key={col.status}>
+            <div key={col.status} className="min-w-0">
               <div
                 className={`mb-3 flex items-center justify-between border-t-2 ${COLUMN_STYLE[col.status]} pt-3`}
               >
@@ -89,9 +89,9 @@ export default function MyTasks() {
                 ) : (
                   col.tasks.map((task) => (
                     <Card key={task._id} className="p-4">
-                      <h3 className="font-medium text-ink">{task.title}</h3>
+                      <h3 className="break-words font-medium text-ink">{task.title}</h3>
                       {task.description && (
-                        <p className="mt-1 text-sm text-muted">{task.description}</p>
+                        <p className="mt-1 break-words text-sm text-muted">{task.description}</p>
                       )}
                       <p className="mt-2 text-xs text-muted">
                         {task.startup?.name}
@@ -103,7 +103,7 @@ export default function MyTasks() {
                             updateTaskStatus({ id: task._id, status: e.target.value })
                           )
                         }
-                        className="mt-3 w-full rounded-lg border border-border bg-surface px-2 py-1 text-xs text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                        className="mt-3 w-full rounded-lg border border-border bg-surface px-2 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:py-1 sm:text-xs"
                       >
                         {STATUSES.map((s) => (
                           <option key={s} value={s}>

@@ -18,7 +18,7 @@ export default function Landing() {
     <div className="min-h-screen bg-navy text-white">
       {/* Nav */}
       <header className="border-b border-white/5">
-        <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+        <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-2.5">
             <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gold">
               <Rocket className="h-4 w-4 text-ink" />
@@ -42,7 +42,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center sm:py-24">
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 py-20 text-center sm:py-24">
         <h1 className="font-display text-3xl font-semibold leading-tight sm:text-4xl">
           Where student founders find their{" "}
           <span className="text-gold">first team</span>.
@@ -68,7 +68,7 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-5xl px-6 pb-20">
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
         <h2 className="mb-8 text-center font-display text-xl font-semibold">
           Everything a startup team needs
         </h2>
@@ -90,7 +90,7 @@ export default function Landing() {
 
       {/* CTA */}
       <section className="border-t border-white/5">
-        <div className="mx-auto max-w-3xl px-6 py-16 text-center">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 text-center">
           <h2 className="font-display text-2xl font-semibold">
             Ready to build your startup?
           </h2>
@@ -108,7 +108,7 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="border-t border-white/5">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-6 py-6 sm:flex-row">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 sm:px-6 py-6 sm:flex-row">
           <p className="font-mono text-xs text-white/35">
             © {new Date().getFullYear()} FounderHub
           </p>

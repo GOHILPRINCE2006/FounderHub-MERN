@@ -76,7 +76,7 @@ export default function AdminUsers() {
         <select
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          className="rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-sm"
         >
           {ROLES.map((r) => (
             <option key={r.value} value={r.value}>{r.label}</option>
@@ -126,7 +126,7 @@ export default function AdminUsers() {
                   <p className="truncate text-xs text-muted">{u.email}</p>
                 </div>
 
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
                   {u.role === "admin" ? (
                     <span className="text-xs text-muted">Admin — protected</span>
                   ) : (

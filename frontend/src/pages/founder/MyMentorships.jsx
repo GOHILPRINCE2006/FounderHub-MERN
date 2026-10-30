@@ -128,7 +128,7 @@ export default function MyMentorships() {
   return (
     <div className="mx-auto max-w-5xl pb-20">
       <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-ink">My Mentorships</h1>
+        <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">My Mentorships</h1>
         <p className="mt-1 text-sm text-muted">
           Track your requests, communicate with mentors, and manage your sessions.
         </p>
@@ -147,7 +147,7 @@ export default function MyMentorships() {
       )}
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-2 border-b border-border">
+      <div className="scrollbar-thin mb-6 flex gap-1 overflow-x-auto border-b border-border sm:gap-2">
         {[
           { id: "Active", label: "Active & Pending", count: activeCount },
           { id: "Completed", label: "Completed", count: completedCount },
@@ -156,7 +156,7 @@ export default function MyMentorships() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors sm:px-4 ${
               activeTab === tab.id
                 ? "border-gold text-gold-dark"
                 : "border-transparent text-muted hover:border-border-strong hover:text-ink"
@@ -187,14 +187,14 @@ export default function MyMentorships() {
 
             return (
               <Card key={req._id} className="overflow-hidden">
-                <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                   
                   {/* Left: Mentor Info */}
-                  <div className="flex-1 space-y-4">
+                  <div className="min-w-0 flex-1 space-y-4">
                     <div className="flex items-start gap-4">
                       <Avatar user={req.mentor} />
-                      <div>
-                        <h3 className="font-display text-lg font-bold text-ink">
+                      <div className="min-w-0">
+                        <h3 className="break-words font-display text-lg font-bold text-ink">
                           {req.mentor?.name || "Unknown Mentor"}
                         </h3>
                         <p className="text-sm text-muted">
@@ -207,8 +207,8 @@ export default function MyMentorships() {
                     </div>
 
                     <div className="rounded-xl bg-paper p-4 space-y-2">
-                      <p className="text-sm text-ink"><span className="font-semibold">Challenge:</span> {req.challenge}</p>
-                      <p className="text-sm text-ink"><span className="font-semibold">Goals:</span> {req.goals}</p>
+                      <p className="break-words text-sm text-ink"><span className="font-semibold">Challenge:</span> {req.challenge}</p>
+                      <p className="break-words text-sm text-ink"><span className="font-semibold">Goals:</span> {req.goals}</p>
                     </div>
 
                     {isPaid && (
@@ -217,13 +217,13 @@ export default function MyMentorships() {
                         <div className="flex flex-col gap-1.5 text-sm text-ink">
                           {req.mentor?.email && (
                             <span className="inline-flex items-center gap-2">
-                              <Mail className="h-4 w-4 text-success" />
-                              <a href={`mailto:${req.mentor.email}`} className="hover:underline">{req.mentor.email}</a>
+                              <Mail className="h-4 w-4 shrink-0 text-success" />
+                              <a href={`mailto:${req.mentor.email}`} className="break-all hover:underline">{req.mentor.email}</a>
                             </span>
                           )}
                           {req.mentor?.phone && (
                             <span className="inline-flex items-center gap-2">
-                              <Phone className="h-4 w-4 text-success" />
+                              <Phone className="h-4 w-4 shrink-0 text-success" />
                               <a href={`tel:${req.mentor.phone}`} className="hover:underline">{req.mentor.phone}</a>
                             </span>
                           )}
@@ -233,7 +233,7 @@ export default function MyMentorships() {
                   </div>
 
                   {/* Right: Status & Actions */}
-                  <div className="flex flex-col gap-4 sm:w-64 sm:border-l sm:border-border sm:pl-6">
+                  <div className="flex flex-col gap-4 border-t border-border pt-4 sm:w-64 sm:shrink-0 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
                     <div className="flex items-center justify-between">
                       <p className="text-xs text-muted">Status</p>
                       <Badge tone={

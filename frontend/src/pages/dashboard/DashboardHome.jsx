@@ -93,7 +93,7 @@ export default function DashboardHome() {
       {awaitingVerification && (
         <div className="mb-6 flex items-start gap-3 rounded-xl border border-warning/40 bg-warning-bg px-4 py-3">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-gold-dark" />
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-medium text-ink">Your {user.role} account is awaiting verification</p>
             <p className="mt-0.5 text-sm text-muted">You&apos;ll get a notification once approved.</p>
           </div>
@@ -101,10 +101,10 @@ export default function DashboardHome() {
       )}
 
       {profileIncomplete && (
-        <div className="mb-6 flex items-start justify-between gap-4 rounded-xl border border-border bg-surface px-4 py-3">
-          <div className="flex items-start gap-3">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 sm:flex-nowrap sm:gap-4">
+          <div className="flex min-w-0 items-start gap-3">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-gold-dark" />
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-medium text-ink">Complete your profile</p>
               <p className="mt-0.5 text-sm text-muted">{missing.length} fields still missing.</p>
             </div>
@@ -113,13 +113,13 @@ export default function DashboardHome() {
         </div>
       )}
 
-      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-xs">
+      <div className="relative overflow-hidden rounded-2xl border border-border bg-surface p-4 shadow-xs sm:p-6">
         <div className="absolute inset-y-0 left-0 w-1 bg-gold" aria-hidden="true" />
         <div className="flex flex-wrap items-start justify-between gap-4 pl-2">
           <div className="min-w-0">
             <p className="font-mono text-[11px] uppercase tracking-widest text-muted">{ROLE_LABEL[user?.role] || "Dashboard"}</p>
-            <h2 className="mt-1 font-display text-2xl font-semibold tracking-tight text-ink">Welcome back, {user?.name?.split(" ")[0] || "there"}.</h2>
-            <p className="mt-1 text-sm text-muted">Signed in as <span className="text-ink">{user?.email}</span></p>
+            <h2 className="mt-1 break-words font-display text-xl font-semibold tracking-tight text-ink sm:text-2xl">Welcome back, {user?.name?.split(" ")[0] || "there"}.</h2>
+            <p className="mt-1 break-all text-sm text-muted">Signed in as <span className="text-ink">{user?.email}</span></p>
           </div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-paper px-3 py-1 text-xs font-medium text-ink">
             <span className="h-1.5 w-1.5 rounded-full bg-success" /> Active

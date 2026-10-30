@@ -130,20 +130,20 @@ export default function BrowseStartups() {
       {/* Filters */}
       <form onSubmit={handleSubmit} className="mb-6 flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
-          <div className="relative min-w-0 flex-1">
+          <div className="relative min-w-full flex-1 sm:min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
             <input
               type="text"
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               placeholder="Search by name or description"
-              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-sm text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              className="w-full rounded-lg border border-border bg-surface py-2 pl-9 pr-3 text-base text-ink placeholder:text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:text-sm"
             />
           </div>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:flex-none sm:text-sm"
           >
             {ROLES.map((r) => (
               <option key={r.value} value={r.value}>
@@ -154,7 +154,7 @@ export default function BrowseStartups() {
           <select
             value={stage}
             onChange={(e) => setStage(e.target.value)}
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-base text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-gold sm:flex-none sm:text-sm"
           >
             <option value="">All stages</option>
             {STAGES.map((s) => (
@@ -230,7 +230,7 @@ export default function BrowseStartups() {
                   )}
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-semibold text-ink">
+                      <h3 className="break-words font-display text-base font-semibold text-ink">
                         {startup.name}
                       </h3>
                       <Badge status={startup.stage} />

@@ -18,11 +18,11 @@ function StatCard({ icon: Icon, label, value, tone = "default" }) {
     navy: "bg-navy/10 text-navy",
   };
   return (
-    <Card className="p-4">
+    <Card className="min-w-0 p-4">
       <span className={`flex h-9 w-9 items-center justify-center rounded-lg ${toneClasses[tone]}`}>
         <Icon className="h-4 w-4" />
       </span>
-      <p className="mt-3 font-display text-2xl font-semibold text-ink">{value}</p>
+      <p className="mt-3 break-words font-display text-xl font-semibold text-ink sm:text-2xl">{value}</p>
       <p className="text-xs text-muted">{label}</p>
     </Card>
   );
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
 
       {/* Users */}
       <h2 className="mb-3 font-display text-sm font-semibold text-ink">Users</h2>
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <StatCard icon={Users} label="Total" value={stats.users.total} tone="navy" />
         <StatCard icon={Users} label="Founders" value={stats.users.founders} />
         <StatCard icon={Users} label="Developers" value={stats.users.developers} />
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
 
       {/* Activity */}
       <h2 className="mt-8 mb-3 font-display text-sm font-semibold text-ink">Activity</h2>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard icon={FileText} label="Tasks" value={stats.activity.totalTasks} />
         <StatCard icon={FileText} label="Recruitment posts" value={stats.activity.totalRecruitmentPosts} />
         <StatCard icon={TrendingUp} label="Applications" value={stats.activity.totalApplications} />

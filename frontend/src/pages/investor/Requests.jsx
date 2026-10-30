@@ -94,13 +94,13 @@ function PayModal({ request, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-ink/40 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-5 shadow-xl">
-        <div className="flex items-start justify-between">
+    <div className="fixed inset-0 z-40 flex items-center justify-center overflow-y-auto bg-ink/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-border bg-surface p-4 shadow-xl sm:p-5">
+        <div className="flex items-start justify-between gap-3">
           <h3 className="font-display text-base font-semibold text-ink">
             Invest in this startup
           </h3>
-          <button onClick={onClose} className="rounded-lg p-1 text-muted hover:bg-paper">
+          <button onClick={onClose} className="shrink-0 rounded-lg p-1 text-muted hover:bg-paper">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -130,7 +130,7 @@ function PayModal({ request, onClose }) {
             required
           />
           {err && <p className="text-xs text-danger">{err}</p>}
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-wrap justify-end gap-2">
             <Button type="button" variant="ghost" onClick={onClose}>
               Cancel
             </Button>
@@ -154,9 +154,9 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
   const isInvested = status === "Invested";
 
   return (
-    <Card>
+    <Card className="min-w-0">
       <div className="flex flex-wrap items-center gap-2">
-        <h3 className="font-display text-base font-semibold text-ink">
+        <h3 className="min-w-0 break-words font-display text-base font-semibold text-ink">
           {startup?.name || "Unknown startup"}
         </h3>
         <Badge
@@ -177,24 +177,24 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
       <p className="text-xs text-muted">
         {[startup?.industry, startup?.location].filter(Boolean).join(" · ")}
       </p>
-      {startup?.tagline && <p className="mt-1 text-sm text-ink">{startup.tagline}</p>}
+      {startup?.tagline && <p className="mt-1 break-words text-sm text-ink">{startup.tagline}</p>}
 
       {startup?.problem && (
         <div className="mt-3">
           <p className="text-xs font-medium uppercase tracking-wider text-muted">Problem</p>
-          <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink">{startup.problem}</p>
+          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-ink">{startup.problem}</p>
         </div>
       )}
       {startup?.solution && (
         <div className="mt-3">
           <p className="text-xs font-medium uppercase tracking-wider text-muted">Solution</p>
-          <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink">{startup.solution}</p>
+          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-ink">{startup.solution}</p>
         </div>
       )}
       {startup?.traction && (
         <div className="mt-3">
           <p className="text-xs font-medium uppercase tracking-wider text-muted">Traction</p>
-          <p className="mt-0.5 whitespace-pre-wrap text-sm text-ink">{startup.traction}</p>
+          <p className="mt-0.5 whitespace-pre-wrap break-words text-sm text-ink">{startup.traction}</p>
         </div>
       )}
       {startup?.technologies?.length > 0 && (
@@ -219,7 +219,7 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
 
       {/* THE FIX: Changed request.message to request.pitch */}
       {request.pitch && (
-        <p className="mt-2 rounded-lg bg-paper p-3 text-sm text-muted">
+        <p className="mt-2 break-words rounded-lg bg-paper p-3 text-sm text-muted">
           "{request.pitch}"
         </p>
       )}
@@ -236,15 +236,15 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
           <div className="mt-1.5 flex flex-col gap-1 text-xs text-ink">
             {founder.email && (
               <span className="inline-flex items-center gap-1.5">
-                <Mail className="h-3 w-3" />
-                <a href={`mailto:${founder.email}`} className="hover:underline">
+                <Mail className="h-3 w-3 shrink-0" />
+                <a href={`mailto:${founder.email}`} className="break-all hover:underline">
                   {founder.email}
                 </a>
               </span>
             )}
             {founder.phone && (
               <span className="inline-flex items-center gap-1.5">
-                <Phone className="h-3 w-3" />
+                <Phone className="h-3 w-3 shrink-0" />
                 <a href={`tel:${founder.phone}`} className="hover:underline">
                   {founder.phone}
                 </a>
@@ -258,6 +258,7 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
         <div className="mt-3 flex gap-2">
           <Button
             size="sm"
+            className="flex-1 sm:flex-none"
             loading={busy === "accept"}
             disabled={busy === "decline"}
             onClick={onAccept}
@@ -267,6 +268,7 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
           <Button
             size="sm"
             variant="danger"
+            className="flex-1 sm:flex-none"
             loading={busy === "decline"}
             disabled={busy === "accept"}
             onClick={onDecline}
@@ -278,7 +280,7 @@ function RequestCard({ request, busy, onAccept, onDecline, onPay }) {
 
       {isAccepted && (
         <div className="mt-3">
-          <Button size="sm" onClick={onPay}>
+          <Button size="sm" className="w-full sm:w-auto" onClick={onPay}>
             <IndianRupee className="h-3.5 w-3.5" />
             Invest
           </Button>

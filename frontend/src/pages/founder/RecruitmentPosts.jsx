@@ -74,8 +74,8 @@ export default function RecruitmentPosts() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+      <div className="mb-6 flex items-start justify-between gap-3 sm:gap-4">
+        <div className="min-w-0">
           <h1 className="font-display text-xl font-semibold text-ink">
             Recruitment Posts
           </h1>
@@ -84,6 +84,7 @@ export default function RecruitmentPosts() {
           </p>
         </div>
         <Button
+          className="shrink-0"
           variant={showForm ? "outline" : "primary"}
           onClick={() => setShowForm((v) => !v)}
         >
@@ -135,15 +136,15 @@ export default function RecruitmentPosts() {
         <div className="flex flex-col gap-3">
           {activePosts.map((post) => (
             <Card key={post._id}>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-display text-base font-semibold text-ink">
+                    <h3 className="break-words font-display text-base font-semibold text-ink">
                       {post.roleTitle}
                     </h3>
                     <Badge status={post.isOpen ? "Open" : "Closed"} />
                   </div>
-                  <p className="mt-1 text-sm text-muted">{post.description}</p>
+                  <p className="mt-1 break-words text-sm text-muted">{post.description}</p>
                   {post.requiredSkills?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {post.requiredSkills.map((skill) => (

@@ -31,15 +31,15 @@ function FounderContact({ founder }) {
       <div className="flex flex-col gap-1.5 text-sm text-ink">
         {founder.email && (
           <span className="inline-flex items-center gap-2">
-            <Mail className="h-4 w-4 text-success" />
-            <a href={`mailto:${founder.email}`} className="hover:underline">
+            <Mail className="h-4 w-4 shrink-0 text-success" />
+            <a href={`mailto:${founder.email}`} className="break-all hover:underline">
               {founder.email}
             </a>
           </span>
         )}
         {founder.phone && (
           <span className="inline-flex items-center gap-2">
-            <Phone className="h-4 w-4 text-success" />
+            <Phone className="h-4 w-4 shrink-0 text-success" />
             <a href={`tel:${founder.phone}`} className="hover:underline">
               {founder.phone}
             </a>
@@ -90,7 +90,7 @@ export default function MentorQueue() {
   return (
     <div className="mx-auto max-w-4xl pb-20">
       <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-ink">Mentorship Workspace</h1>
+        <h1 className="font-display text-xl font-bold text-ink sm:text-2xl">Mentorship Workspace</h1>
         <p className="mt-1 text-sm text-muted">
           Manage your incoming requests, active mentorships, and session history.
         </p>
@@ -110,7 +110,7 @@ export default function MentorQueue() {
       )}
 
       {/* Tabs */}
-      <div className="mb-6 flex gap-2 border-b border-border">
+      <div className="scrollbar-thin mb-6 flex gap-1 overflow-x-auto border-b border-border sm:gap-2">
         {[
           { id: "Pending", label: "Requests", count: pending.length },
           { id: "Accepted", label: "Active Mentorships", count: accepted.length },
@@ -119,7 +119,7 @@ export default function MentorQueue() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+            className={`flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors sm:px-4 ${
               activeTab === tab.id
                 ? "border-gold text-gold-dark"
                 : "border-transparent text-muted hover:border-border-strong hover:text-ink"
@@ -150,22 +150,24 @@ export default function MentorQueue() {
 
             return (
               <Card key={req._id} className="overflow-hidden">
-                <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
                   
                   {/* Left: Request Info */}
-                  <div className="flex-1 space-y-4">
+                  <div className="min-w-0 flex-1 space-y-4">
                     <div className="flex items-start justify-between sm:justify-start gap-3">
-                      <div>
-                        <h3 className="font-display text-lg font-bold text-ink">
+                      <div className="min-w-0">
+                        <h3 className="break-words font-display text-lg font-bold text-ink">
                           {req.startup?.name || "Unknown Startup"}
                         </h3>
                         <p className="text-sm text-muted">
                           Requested by <span className="font-medium text-ink">{req.founder?.name}</span> on {formatDate(req.createdAt)}
                         </p>
                       </div>
-                      <Badge tone={isPaid ? "success" : isAccepted ? "info" : isPending ? "warning" : "neutral"}>
-                        {isPaid ? "Paid" : req.status}
-                      </Badge>
+                      <div className="shrink-0">
+                        <Badge tone={isPaid ? "success" : isAccepted ? "info" : isPending ? "warning" : "neutral"}>
+                          {isPaid ? "Paid" : req.status}
+                        </Badge>
+                      </div>
                     </div>
 
                     <div className="rounded-xl bg-paper p-4 space-y-3">
@@ -173,17 +175,17 @@ export default function MentorQueue() {
                         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted mb-1">
                           <AlertCircle className="h-3.5 w-3.5" /> Challenge
                         </p>
-                        <p className="text-sm text-ink">{req.challenge || "Not specified"}</p>
+                        <p className="break-words text-sm text-ink">{req.challenge || "Not specified"}</p>
                       </div>
                       <div>
                         <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted mb-1">
                           <Target className="h-3.5 w-3.5" /> Goals
                         </p>
-                        <p className="text-sm text-ink">{req.goals || "Not specified"}</p>
+                        <p className="break-words text-sm text-ink">{req.goals || "Not specified"}</p>
                       </div>
                       {req.message && (
                         <div className="pt-2 border-t border-border/50">
-                          <p className="text-sm italic text-muted">"{req.message}"</p>
+                          <p className="break-words text-sm italic text-muted">"{req.message}"</p>
                         </div>
                       )}
                     </div>
@@ -192,7 +194,7 @@ export default function MentorQueue() {
                   </div>
 
                   {/* Right: Actions & Price */}
-                  <div className="flex flex-col gap-4 sm:w-64 sm:border-l sm:border-border sm:pl-6">
+                  <div className="flex flex-col gap-4 border-t border-border pt-4 sm:w-64 sm:shrink-0 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
                     <div>
                       <p className="text-xs text-muted">Session Rate</p>
                       <p className="font-display text-xl font-bold text-ink">{formatINR(req.priceAtRequest)}</p>
